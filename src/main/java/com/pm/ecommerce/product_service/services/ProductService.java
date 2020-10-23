@@ -16,9 +16,15 @@ public class ProductService {
         return str.toLowerCase().replaceAll("[\\s+]", "-");
     }
 
-    public Product createProduct(Product product) throws Exception {
+    public Product createProduct(Product product, int vendorId) throws Exception {
+        //assume a vendor with id 1 is trying to create a product
+        //get all products of vendor with id 1
+
+        // check if the product already contain a product with the slug
+        // of this new product
+        // if it does throw an except that the product already exists
+
         // add validations here
-        Vendor vendor = product.getVendor();
         // check if the vendor does not have the same product already
         // slug == prod slug and vendor == prod vendor
         Product existing = repository.getBySlug(this.makeSlug(product.getName()));
