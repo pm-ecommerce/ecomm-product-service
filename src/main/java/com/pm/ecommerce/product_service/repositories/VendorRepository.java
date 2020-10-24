@@ -1,11 +1,11 @@
-package com.pm.ecommerce.product_service.repository;
+package com.pm.ecommerce.product_service.repositories;
 
 import com.pm.ecommerce.entities.Vendor;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface VendorRepository extends JpaRepository<Vendor,Integer> {
 
-       Vendor getById(int id);
+       //Vendor getById(int id);
 
        Vendor getByBusinessName(int id);
        Vendor getByAddress(String addressname);
