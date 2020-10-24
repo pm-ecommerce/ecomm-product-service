@@ -2,7 +2,9 @@ package com.pm.ecommerce.product_service.service;
 
 import com.pm.ecommerce.entities.Category;
 import com.pm.ecommerce.entities.Product;
+import com.pm.ecommerce.entities.Vendor;
 import com.pm.ecommerce.product_service.repository.CategoryRepository;
+import com.pm.ecommerce.product_service.repository.VendorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,12 +18,29 @@ public class CategoryService {
     CategoryRepository categoryrepository;
 
 
-    public Category createCategoy(Category category) throws Exception {
+    @Autowired
+    VendorRepository vendorrepository;
+
+
+    public Category createCategoy(Category category,int vendorid) throws Exception {
 
         Category existed = categoryrepository.findByName(category.getName());
 
+        Vendor vendorexist = vendorrepository.getById(vendorid);
 
-        if (existed != null) {
+
+        String vendorname = vendorexist.getBusinessName();
+
+
+
+
+
+          if(vendorexist==null){
+
+              throw  new Exception("vendor not exist");
+          }
+
+        if (existed != null&&vendorexist!=null) {
 
             throw new Exception("category is allready Existed");
 
@@ -30,6 +49,10 @@ public class CategoryService {
 
             throw new Exception("category should not be null");
         }
+                   category.setName(category.getName());
+
+                      vendorexist.setBusinessName(vendorname);
+
 
         return categoryrepository.save(category);
 

@@ -17,38 +17,37 @@ import java.util.List;
 @RequestMapping("/api/catagories")
 public class CategoriesController {
 
-        @Autowired
-       CategoryService categoryservice;
+    @Autowired
+    CategoryService categoryservice;
 
-        @PostMapping("/")
-    public ResponseEntity<ApiResponse<Category>>createCategory(@Valid @RequestBody Category category){
+    @PostMapping("/{vendorsid}")
+    public ResponseEntity<ApiResponse<Category>> createCategory(@Valid @RequestBody Category category, @PathVariable int vendorsid) {
 
-         ApiResponse<Category> response=new ApiResponse<Category>();
+        ApiResponse<Category> response = new ApiResponse<Category>();
 
-          if(category==null) {
+        if (category == null) {
 
-              response.setStatus(400);
+            response.setStatus(400);
 
-              response.setMessage("Categories not Created");
-          }
-                 try{
-                     Category created=categoryservice.createCategoy(category);
+            response.setMessage("Categories not Created");
+        }
+        try {
+            Category created = categoryservice.createCategoy(category,vendorsid);
 
-                        if(created!=null){
+            if (created != null) {
 
-                            response.setStatus(200);
-                            response.setData(created);
-                            response.setMessage("successfully created category");
-                        }
-                 }
-                 catch(Exception e){
+                response.setStatus(200);
+                response.setData(created);
+                response.setMessage("successfully created category");
+            }
+        } catch (Exception e) {
 
-                          response.setMessage(e.getMessage());
-                          response.setStatus(500);
-                 }
+            response.setMessage(e.getMessage());
+            response.setStatus(500);
+        }
 
 
-         return ResponseEntity.ok(response);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/all")
