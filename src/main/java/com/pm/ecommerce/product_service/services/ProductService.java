@@ -1,15 +1,16 @@
-package com.pm.ecommerce.product_service.service;
+package com.pm.ecommerce.product_service.services;
 
 import com.pm.ecommerce.entities.Category;
 import com.pm.ecommerce.entities.Product;
 import com.pm.ecommerce.entities.Vendor;
 import com.pm.ecommerce.enums.ProductStatus;
-import com.pm.ecommerce.product_service.repository.CategoryRepository;
-import com.pm.ecommerce.product_service.repository.ProductRepository;
-import com.pm.ecommerce.product_service.repository.VendorRepository;
+import com.pm.ecommerce.product_service.repositories.CategoryRepository;
+import com.pm.ecommerce.product_service.repositories.ProductRepository;
+import com.pm.ecommerce.product_service.repositories.VendorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -34,8 +35,8 @@ public class ProductService {
         Product existing = productrepository.getBySlug(this.generateslug(product.getName()));
 
 
-        Vendor vendorexist = vendorrepository.getById(vendorid);
-        Category categoryexisted = categoryrepository.findById(vendorexist.getId());
+        Vendor vendorexist = vendorrepository.findById(vendorid).get();
+        Category categoryexisted = categoryrepository.findById(vendorexist.getId()).get();
 
         String vendorname = vendorexist.getBusinessName();
         String categoryname = categoryexisted.getName();
@@ -53,8 +54,8 @@ public class ProductService {
         product.setSlug(this.generateslug(product.getName()));
         product.setName(product.getName());
         product.setDescription(product.getDescription());
-        vendorexist.setBusinessName(vendorname);
-        categoryexisted.setName(categoryname);
+        product.setCategory(categoryexisted);
+        product.setVendor(vendorexist);
 
 
         product.setStatus(ProductStatus.CREATED);
@@ -63,13 +64,13 @@ public class ProductService {
     }
 
 
-    public Product updateproduct(Product product, int vendorid, int productid) throws Exception {
+    public Product updateproduct(int vendorid,int productid,Product product) throws Exception {
 
         // problem is name always should be given
 
         Random rand = new Random();
 
-        Vendor exisistedvendor = vendorrepository.getById(vendorid);
+        Vendor exisistedvendor = vendorrepository.findById(vendorid).get();
         // Vendor businessname=vendorrepository.getByBusinessName(exisistedvendor.getId());
 
 
@@ -113,21 +114,45 @@ public class ProductService {
 
 
 
-    public Product findById(int vendorid, int productid) throws Exception {
-        Vendor exisistedvendor = vendorrepository.getById(vendorid);
-          if(exisistedvendor==null){
 
-              throw new Exception("vendor not found");
-          }
-        Optional<Product> result = productrepository.findById(productid);
 
-        Product product = null;
-        if (result.isPresent()) {
-            product = result.get();
-        } else {
-            throw new RuntimeException("Did not find your product id - " + productid);
+    public List<Product> findAllProducts(int vendorid) throws Exception{
+
+        Vendor exisistedvendor = vendorrepository.findById(vendorid).get();
+        if(exisistedvendor==null){
+
+            throw new Exception("vendor not exist");
         }
-        return product;
+        return productrepository.findAll();
+
+    }
+    public Product findByproductsByID(int vendorid,int productid) throws Exception {
+
+        Vendor exisistedvendor = vendorrepository.findById(vendorid).get();
+        Product existedproduct= productrepository.findById(productid).get();
+
+        if(exisistedvendor==null&&existedproduct==null){
+
+            throw new Exception("your file not found");
+        }
+
+
+        return existedproduct;
+    }
+
+    public void deleteByproductsByID(int vendorid,int productid) throws Exception {
+
+        Vendor exisistedvendor = vendorrepository.findById(vendorid).get();
+        Product existedproduct= productrepository.findById(productid).get();
+
+        if(exisistedvendor==null&&existedproduct==null){
+
+            throw new Exception("your file not found");
+        }
+             String name=existedproduct.getName();
+
+         existedproduct.setName(name);
+         productrepository.delete(existedproduct);
     }
 
 

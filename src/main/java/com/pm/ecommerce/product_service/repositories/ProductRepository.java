@@ -1,10 +1,7 @@
-package com.pm.ecommerce.product_service.repository;
+package com.pm.ecommerce.product_service.repositories;
 
-import com.pm.ecommerce.entities.Category;
 import com.pm.ecommerce.entities.Product;
-import com.pm.ecommerce.entities.Vendor;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
 public interface ProductRepository extends JpaRepository<Product ,Integer> {
 
@@ -14,7 +11,7 @@ public interface ProductRepository extends JpaRepository<Product ,Integer> {
 
          Product getById(int id);
 
-         void deleteById(int productid);
+
 
 
 

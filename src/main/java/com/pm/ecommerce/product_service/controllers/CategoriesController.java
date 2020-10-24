@@ -1,10 +1,8 @@
-package com.pm.ecommerce.product_service.controller;
+package com.pm.ecommerce.product_service.controllers;
 
 import com.pm.ecommerce.entities.ApiResponse;
 import com.pm.ecommerce.entities.Category;
-import com.pm.ecommerce.entities.Product;
-import com.pm.ecommerce.product_service.service.CategoryService;
-import com.pm.ecommerce.product_service.service.ProductService;
+import com.pm.ecommerce.product_service.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,20 +48,35 @@ public class CategoriesController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/all")
-    public List<Category> getAllcategories() {
+    @GetMapping("/{vendorid}")
+    public ResponseEntity<ApiResponse<Category>>getAllcategories(@PathVariable int vendorid) {
+
+        ApiResponse<Category> response = new ApiResponse<>();
 
 
-        return categoryservice.getAllCategories();
+
+        try {
+            List<Category>allcatagories = categoryservice.findAllCatagories(vendorid);
+
+            response.setData((Category) allcatagories);
+            response.setMessage("Get All categories by vendorid id");
+        } catch (Exception e) {
+            response.setStatus(500);
+            response.setMessage(e.getMessage());
+
+        }
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{catgoriesid}")
-    public ResponseEntity<ApiResponse<Category>> getAddressId(@PathVariable int categoryid) {
+    @GetMapping("/{vendorid}/{categoryid}")
+    public ResponseEntity<ApiResponse<Category>> getcatagory(@PathVariable int vendorid,
+
+                                                              @PathVariable int categoryid) {
         ApiResponse<Category> response = new ApiResponse<>();
 
         try {
-            Category category = categoryservice.findById(categoryid);
-            category.setId(0);
+            Category category = categoryservice.findBycatagoriesbyID(vendorid,categoryid);
+            //category.setId(0);
             response.setData(category);
             response.setMessage("Get categories by id");
         } catch (Exception e) {
