@@ -1,9 +1,7 @@
 package com.pm.ecommerce.product_service.controllers;
 
 import com.pm.ecommerce.entities.ApiResponse;
-import com.pm.ecommerce.entities.Category;
 import com.pm.ecommerce.entities.Product;
-
 import com.pm.ecommerce.product_service.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,42 +14,37 @@ import java.util.List;
 @RequestMapping("/api/products/")
 public class ProductsController {
 
-          @Autowired
-          ProductService productservice;
+    @Autowired
+    ProductService productservice;
 
-          @PostMapping("/{vendorid}")
-    public ResponseEntity<ApiResponse<Product>> createProduct(@RequestBody() Product product,
-                                                              @PathVariable int vendorid){
-              ApiResponse<Product> response=new ApiResponse<Product>();
+    @PostMapping("/{vendorid}")
+    public ResponseEntity<ApiResponse<Product>> createProduct(@RequestBody() Product product, @PathVariable int vendorid) {
+        ApiResponse<Product> response = new ApiResponse<>();
+        try {
+            Product createdp = productservice.creatproduct(product, vendorid);
+            response.setMessage("product is created successfully");
+            response.setData(createdp);
 
-        try{
-               Product createdp=productservice.creatproduct(product,vendorid);
-               response.setMessage("product is created successfully");
-                 response.setData(createdp);
+            response.setStatus(200);
 
-                  response.setStatus(200);
-
+        } catch (Exception e) {
+            System.out.println(e);
+            response.setMessage(e.getMessage());
+            response.setStatus(500);
         }
-       catch (Exception e){
 
-         response.setMessage(e.getMessage());
-         response.setStatus(500);
-      }
         return ResponseEntity.ok(response);
-
-        }
-
-
+    }
 
 
     @PutMapping("/update/{vendourid}/{productid}")
-    public ResponseEntity<ApiResponse<Product>> updateProduct(@PathVariable int vendourid,@PathVariable
+    public ResponseEntity<ApiResponse<Product>> updateProduct(@PathVariable int vendourid, @PathVariable
             int productid, @RequestBody Product product) throws Exception {
         ApiResponse<Product> response = new ApiResponse<>();
         try {
 
 
-            Product updated=productservice.updateproduct(vendourid,productid,product);
+            Product updated = productservice.updateproduct(vendourid, productid, product);
             response.setMessage("update product successfully");
             response.setStatus(200);
 
@@ -64,10 +57,9 @@ public class ProductsController {
     }
 
     @GetMapping("/{vendorid}")
-    public ResponseEntity<ApiResponse<Product>>getAllproducts(@PathVariable int vendorid) {
+    public ResponseEntity<ApiResponse<Product>> getAllproducts(@PathVariable int vendorid) {
 
         ApiResponse<Product> response = new ApiResponse<>();
-
 
 
         try {
@@ -84,13 +76,12 @@ public class ProductsController {
     }
 
 
-
     @GetMapping("/{vendorid}/{productid}")
-    public ResponseEntity<ApiResponse<Product>> getproductid(@PathVariable int vendorid,@PathVariable int productid) {
+    public ResponseEntity<ApiResponse<Product>> getproductid(@PathVariable int vendorid, @PathVariable int productid) {
         ApiResponse<Product> response = new ApiResponse<>();
 
         try {
-            Product product = productservice.findByproductsByID(vendorid,productid);
+            Product product = productservice.findByproductsByID(vendorid, productid);
             response.setData(product);
             response.setMessage("your product is ");
         } catch (Exception e) {
@@ -101,13 +92,13 @@ public class ProductsController {
         return ResponseEntity.ok(response);
     }
 
-      @DeleteMapping("/{vendorid}/{productid}")
-    public ResponseEntity<ApiResponse<Product>> deleteproductsid(@PathVariable int vendorid,@PathVariable int productid) {
+    @DeleteMapping("/{vendorid}/{productid}")
+    public ResponseEntity<ApiResponse<Product>> deleteproductsid(@PathVariable int vendorid, @PathVariable int productid) {
         ApiResponse<Product> response = new ApiResponse<>();
 
         try {
-            productservice.deleteByproductsByID(vendorid,productid);
-           // response.setData("your product"+productid+"is deleted");
+            productservice.deleteByproductsByID(vendorid, productid);
+            // response.setData("your product"+productid+"is deleted");
             response.setMessage("your product is removed ");
         } catch (Exception e) {
             response.setStatus(500);

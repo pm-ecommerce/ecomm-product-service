@@ -1,12 +1,14 @@
 package com.pm.ecommerce.product_service.repositories;
 
 import com.pm.ecommerce.entities.Vendor;
+import com.pm.ecommerce.enums.VendorStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface VendorRepository extends JpaRepository<Vendor,Integer> {
+public interface VendorRepository extends JpaRepository<Vendor, Integer> {
 
-       //Vendor getById(int id);
+    Vendor findByIdAndStatus(int id, VendorStatus status);
 
-       Vendor getByBusinessName(int id);
-       Vendor getByAddress(String addressname);
+    Vendor getByBusinessName(int id);
+
+    Vendor getByAddress(String addressname);
 }
