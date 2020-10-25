@@ -2,6 +2,8 @@ package com.pm.ecommerce.product_service.controllers;
 
 import com.pm.ecommerce.entities.ApiResponse;
 import com.pm.ecommerce.entities.Product;
+
+import com.pm.ecommerce.product_service.models.ProductResponse;
 import com.pm.ecommerce.product_service.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,37 +20,35 @@ public class ProductsController {
     ProductService productservice;
 
     @PostMapping("/{vendorid}")
-    public ResponseEntity<ApiResponse<Product>> createProduct(@RequestBody() Product product, @PathVariable int vendorid) {
-        ApiResponse<Product> response = new ApiResponse<>();
+    public ResponseEntity<ApiResponse<ProductResponse>> createProduct(@RequestBody() Product product, @PathVariable int vendorid) {
+        ApiResponse<ProductResponse> response = new ApiResponse<>();
         try {
-            Product createdp = productservice.creatproduct(product, vendorid);
-            response.setMessage("product is created successfully");
-            response.setData(createdp);
-
+            ProductResponse created = productservice.creatproduct(product,vendorid);
             response.setStatus(200);
-
+            response.setData(created);
+            response.setMessage("successfully created category");
         } catch (Exception e) {
-            System.out.println(e);
             response.setMessage(e.getMessage());
             response.setStatus(500);
         }
-
         return ResponseEntity.ok(response);
-    }
+        }
+
 
 
     @PutMapping("/update/{vendourid}/{productid}")
-    public ResponseEntity<ApiResponse<Product>> updateProduct(@PathVariable int vendourid, @PathVariable
-            int productid, @RequestBody Product product) throws Exception {
-        ApiResponse<Product> response = new ApiResponse<>();
+    public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(@RequestBody Product product,
+                                                              @PathVariable int vendourid,
+                                                              @PathVariable int productid) throws Exception {
+        ApiResponse<ProductResponse> response = new ApiResponse<>();
         try {
 
 
-            Product updated = productservice.updateproduct(vendourid, productid, product);
+            ProductResponse updated = productservice.updateproduct(product, vendourid, productid);
             response.setMessage("update product successfully");
             response.setStatus(200);
 
-            response.setData(product);
+            response.setData(updated);
         } catch (Exception e) {
             response.setMessage(e.getMessage());
             response.setStatus(500);

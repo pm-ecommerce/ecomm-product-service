@@ -5,4 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ProductRepository extends JpaRepository<Product, Integer> {
     Product findOneBySlug(String slug);
+
+    Product findByIdAndVendorId(int producid,int vendorid);
+
+    Product findByName(int productid);
 }
