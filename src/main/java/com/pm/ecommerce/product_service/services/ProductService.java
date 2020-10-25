@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -63,99 +64,89 @@ public class ProductService {
         return new ProductResponse(productrepository.save(product));
     }
 
-    public ProductResponse updateproduct(Product product, int vendorid,int productid) throws Exception {
+    public ProductResponse updateproduct(Product product, int vendorid, int productid) throws Exception {
 
         if (product == null) {
             throw new Exception("Data expected with this request.");
         }
-        Product pro=productrepository.findByIdAndVendorId(productid,vendorid);
-        if(pro==null){
 
+        Product pro = productrepository.findByIdAndVendorId(productid, vendorid);
+        if (pro == null) {
             throw new Exception("find exception");
         }
+<<<<<<< HEAD
        Product existedproduct=productrepository.findById(productid).orElse(null);
         if(existedproduct==null){
+=======
+>>>>>>> a01d3eb3fdd0705c8d23abf065a5fae2d400c7c2
 
-            throw new Exception("your product id not found");
+        Product existingProduct = productrepository.findById(productid).orElse(null);
+        if (existingProduct == null) {
+            throw new Exception("your product was not found");
         }
-
 
         if (product.getDescription() == null && product.getName() == null && product.getPrice() <= 0) {
             throw new Exception("you have to fill all detail of Product");
         }
 
+        if (product.getName() != null && product.getName().length() > 0) {
+            Product existing = productrepository.findOneBySlug(generateslug(product.getName(), vendorid));
 
-        Product existing = productrepository.findOneBySlug(generateslug(existedproduct.getName()+existedproduct.getName(), vendorid));
-
-        if (existing != null) {
-            throw new Exception("Product is already available");
+            if (existing != null) {
+                throw new Exception("A product with the same name is already available");
+            }
         }
-
 
         Vendor vendor = vendorrepository.findByIdAndStatus(vendorid, VendorStatus.APPROVED);
         if (vendor == null) {
             throw new Exception("Vendor does not exist.");
         }
 
-            if(product.getCategory()==null) {
-                Category existingCategory = categoryrepository.findByIdAndVendorIdAndIsDeleted(existedproduct.getCategory().getId(), vendorid, false);
-                if(existingCategory==null){
-                    throw new Exception("1111 .");
-                }
-                else{
-                    product.setCategory(existingCategory);
-                }
-
+        if (product.getCategory() == null) {
+            Category existingCategory = categoryrepository.findByIdAndVendorIdAndIsDeleted(existingProduct.getCategory().getId(), vendorid, false);
+            if (existingCategory == null) {
+                throw new Exception("Category does not exist.");
             }
-
-        else if (product.getCategory()!=null) {
+        } else if (product.getCategory() != null) {
             Category existingCategory = categoryrepository.findByIdAndVendorIdAndIsDeleted(product.getCategory().getId(),
-                    vendorid, false);{
-                if(existingCategory==null){
-                    throw new Exception("121.");
+                    vendorid, false);
+            {
+                if (existingCategory == null) {
+                    throw new Exception("Category does not exist.");
                 }
-                else{
-                    product.setCategory(existingCategory);
-                }
+                existingProduct.setCategory(existingCategory);
             }
-
-        }
-         if(product.getDescription()!=null&&!existedproduct.getDescription().equals(product.getDescription())){
-
-             product.setDescription(product.getDescription());
-         }
-         else {
-             product.setDescription(existedproduct.getDescription());
-         }
-        if(product.getPrice()<=0&&existedproduct.getPrice()!=existedproduct.getPrice()){
-
-            product.setPrice(product.getPrice());
-        }
-        else {
-            product.setPrice(existedproduct.getPrice());
         }
 
+        if (product.getDescription() != null && !existingProduct.getDescription().equals(product.getDescription())) {
+            existingProduct.setDescription(product.getDescription());
+        }
 
-        product.setSlug(this.generateslug(product.getName(), vendorid));
+        if (product.getPrice() <= 0 && existingProduct.getPrice() != existingProduct.getPrice()) {
+            existingProduct.setPrice(product.getPrice());
+        }
 
-        product.setVendor(vendor);
+        if (product.getName() != null && product.getName().length() > 0) {
+            existingProduct.setName(product.getName());
+            existingProduct.setSlug(this.generateslug(product.getName(), vendorid));
+        }
+
         product.setStatus(ProductStatus.UPDATED);
 
-        return new ProductResponse(productrepository.save(product));
-
-
+        return new ProductResponse(productrepository.save(existingProduct));
     }
 
-
-
-
-    public List<Product> findAllProducts(int vendorid) throws Exception {
-        Vendor exisistedvendor = vendorrepository.findById(vendorid).get();
+    public List<ProductResponse> findAllProducts(int vendorid) throws Exception {
+        Vendor exisistedvendor = vendorrepository.findByIdAndStatus(vendorid, VendorStatus.APPROVED);
         if (exisistedvendor == null) {
             throw new Exception("vendor not exist");
         }
 
-        return productrepository.findAll();
+        return productrepository.findAllByVendorId(vendorid).stream().map(ProductResponse::new).collect(Collectors.toList());
+    }
+
+    public List<ProductResponse> findAllProductsByStatus() {
+        return productrepository.findAll().stream().map(ProductResponse::new).collect(Collectors.toList());
     }
 
     public Product findByproductsByID(int vendorid, int productid) throws Exception {
