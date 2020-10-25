@@ -73,7 +73,7 @@ public class ProductService {
 
             throw new Exception("find exception");
         }
-       Product existedproduct=productrepository.findById(productid).get();
+       Product existedproduct=productrepository.findById(productid).orElse(null);
         if(existedproduct==null){
 
             throw new Exception("your product id not found");
