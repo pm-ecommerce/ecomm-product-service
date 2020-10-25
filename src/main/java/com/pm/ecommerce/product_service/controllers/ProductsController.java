@@ -57,15 +57,12 @@ public class ProductsController {
     }
 
     @GetMapping("/{vendorid}")
-    public ResponseEntity<ApiResponse<Product>> getAllproducts(@PathVariable int vendorid) {
-
-        ApiResponse<Product> response = new ApiResponse<>();
-
-
+    public ResponseEntity<ApiResponse<List<Product>>> getAllproducts(@PathVariable int vendorid) {
+        ApiResponse<List<Product>> response = new ApiResponse<>();
         try {
             List<Product> allProducts = productservice.findAllProducts(vendorid);
 
-            response.setData((Product) allProducts);
+            response.setData(allProducts);
             response.setMessage("Get All products by vendorid id");
         } catch (Exception e) {
             response.setStatus(500);
@@ -74,7 +71,6 @@ public class ProductsController {
         }
         return ResponseEntity.ok(response);
     }
-
 
     @GetMapping("/{vendorid}/{productid}")
     public ResponseEntity<ApiResponse<Product>> getproductid(@PathVariable int vendorid, @PathVariable int productid) {
