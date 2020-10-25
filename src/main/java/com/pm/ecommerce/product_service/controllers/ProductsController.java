@@ -2,7 +2,6 @@ package com.pm.ecommerce.product_service.controllers;
 
 import com.pm.ecommerce.entities.ApiResponse;
 import com.pm.ecommerce.entities.Product;
-
 import com.pm.ecommerce.product_service.models.ProductResponse;
 import com.pm.ecommerce.product_service.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +22,7 @@ public class ProductsController {
     public ResponseEntity<ApiResponse<ProductResponse>> createProduct(@RequestBody() Product product, @PathVariable int vendorid) {
         ApiResponse<ProductResponse> response = new ApiResponse<>();
         try {
-            ProductResponse created = productservice.creatproduct(product,vendorid);
+            ProductResponse created = productservice.creatproduct(product, vendorid);
             response.setStatus(200);
             response.setData(created);
             response.setMessage("successfully created category");
@@ -32,18 +31,14 @@ public class ProductsController {
             response.setStatus(500);
         }
         return ResponseEntity.ok(response);
-        }
+    }
 
-
-
-    @PutMapping("/update/{vendourid}/{productid}")
+    @PutMapping("/{vendourid}/{productid}")
     public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(@RequestBody Product product,
-                                                              @PathVariable int vendourid,
-                                                              @PathVariable int productid) throws Exception {
+                                                                      @PathVariable int vendourid,
+                                                                      @PathVariable int productid) throws Exception {
         ApiResponse<ProductResponse> response = new ApiResponse<>();
         try {
-
-
             ProductResponse updated = productservice.updateproduct(product, vendourid, productid);
             response.setMessage("update product successfully");
             response.setStatus(200);
@@ -56,11 +51,28 @@ public class ProductsController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{vendorid}")
-    public ResponseEntity<ApiResponse<List<Product>>> getAllproducts(@PathVariable int vendorid) {
-        ApiResponse<List<Product>> response = new ApiResponse<>();
+    @GetMapping("")
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllproducts(@PathVariable int vendorid) {
+        ApiResponse<List<ProductResponse>> response = new ApiResponse<>();
         try {
-            List<Product> allProducts = productservice.findAllProducts(vendorid);
+            List<ProductResponse> allProducts = productservice.findAllProductsByStatus();
+
+            response.setData(allProducts);
+            response.setMessage("Get All products by vendorid id");
+        } catch (Exception e) {
+            response.setStatus(500);
+            response.setMessage(e.getMessage());
+
+        }
+        return ResponseEntity.ok(response);
+    }
+
+
+    @GetMapping("/{vendorid}")
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllproductsByVendor(@PathVariable int vendorid) {
+        ApiResponse<List<ProductResponse>> response = new ApiResponse<>();
+        try {
+            List<ProductResponse> allProducts = productservice.findAllProducts(vendorid);
 
             response.setData(allProducts);
             response.setMessage("Get All products by vendorid id");
