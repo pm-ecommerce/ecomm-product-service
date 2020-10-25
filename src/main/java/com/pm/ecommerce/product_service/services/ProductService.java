@@ -5,6 +5,7 @@ import com.pm.ecommerce.entities.Product;
 import com.pm.ecommerce.entities.Vendor;
 import com.pm.ecommerce.enums.ProductStatus;
 import com.pm.ecommerce.enums.VendorStatus;
+import com.pm.ecommerce.product_service.models.ProductResponse;
 import com.pm.ecommerce.product_service.repositories.CategoryRepository;
 import com.pm.ecommerce.product_service.repositories.ProductRepository;
 import com.pm.ecommerce.product_service.repositories.VendorRepository;
@@ -28,7 +29,7 @@ public class ProductService {
         return vendorId + "-" + str.toLowerCase().replaceAll("[\\s+]", "-");
     }
 
-    public Product creatproduct(Product product, int vendorid) throws Exception {
+    public ProductResponse creatproduct(Product product, int vendorid) throws Exception {
         if (product == null) {
             throw new Exception("Data expected with this request.");
         }
@@ -59,30 +60,94 @@ public class ProductService {
         product.setVendor(vendor);
         product.setStatus(ProductStatus.CREATED);
 
-        return productrepository.save(product);
+        return new ProductResponse(productrepository.save(product));
     }
 
+    public ProductResponse updateproduct(Product product, int vendorid,int productid) throws Exception {
 
-    public Product updateproduct(int vendorid, int productid, Product product) throws Exception {
-        Vendor exisistedvendor = vendorrepository.findById(vendorid).get();
-        Product existedproduct = productrepository.findById(productid).get();
+        if (product == null) {
+            throw new Exception("Data expected with this request.");
+        }
+        Product pro=productrepository.findByIdAndVendorId(productid,vendorid);
+        if(pro==null){
 
-        if (product.getDescription() == null) {
-            product.setDescription(existedproduct.getDescription());
+            throw new Exception("find exception");
+        }
+       Product existedproduct=productrepository.findById(productid).get();
+        if(existedproduct==null){
+
+            throw new Exception("your product id not found");
         }
 
-        if (product.getPrice() <= 0) {
+
+        if (product.getDescription() == null && product.getName() == null && product.getPrice() <= 0) {
+            throw new Exception("you have to fill all detail of Product");
+        }
+
+
+        Product existing = productrepository.findOneBySlug(generateslug(existedproduct.getName()+existedproduct.getName(), vendorid));
+
+        if (existing != null) {
+            throw new Exception("Product is already available");
+        }
+
+
+        Vendor vendor = vendorrepository.findByIdAndStatus(vendorid, VendorStatus.APPROVED);
+        if (vendor == null) {
+            throw new Exception("Vendor does not exist.");
+        }
+
+            if(product.getCategory()==null) {
+                Category existingCategory = categoryrepository.findByIdAndVendorIdAndIsDeleted(existedproduct.getCategory().getId(), vendorid, false);
+                if(existingCategory==null){
+                    throw new Exception("1111 .");
+                }
+                else{
+                    product.setCategory(existingCategory);
+                }
+
+            }
+
+        else if (product.getCategory()!=null) {
+            Category existingCategory = categoryrepository.findByIdAndVendorIdAndIsDeleted(product.getCategory().getId(),
+                    vendorid, false);{
+                if(existingCategory==null){
+                    throw new Exception("121.");
+                }
+                else{
+                    product.setCategory(existingCategory);
+                }
+            }
+
+        }
+         if(product.getDescription()!=null&&!existedproduct.getDescription().equals(product.getDescription())){
+
+             product.setDescription(product.getDescription());
+         }
+         else {
+             product.setDescription(existedproduct.getDescription());
+         }
+        if(product.getPrice()<=0&&existedproduct.getPrice()!=existedproduct.getPrice()){
+
+            product.setPrice(product.getPrice());
+        }
+        else {
             product.setPrice(existedproduct.getPrice());
         }
 
-        if (product.getName() == null && product.getDescription() == null && product.getPrice() == 0) {
-            throw new Exception("you didn't update nothing");
-        }
 
-        product.setSlug(generateslug(product.getName(), vendorid));
+        product.setSlug(this.generateslug(product.getName(), vendorid));
+
+        product.setVendor(vendor);
         product.setStatus(ProductStatus.UPDATED);
-        return productrepository.save(product);
+
+        return new ProductResponse(productrepository.save(product));
+
+
     }
+
+
+
 
     public List<Product> findAllProducts(int vendorid) throws Exception {
         Vendor exisistedvendor = vendorrepository.findById(vendorid).get();
