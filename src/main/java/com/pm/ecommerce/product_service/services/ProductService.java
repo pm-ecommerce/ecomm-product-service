@@ -118,7 +118,7 @@ public class ProductService {
         productrepository.delete(existedproduct);
     }
 
-    public Product sendForApproval(int productId) throws Exception {
+    public Product sendForApproval(int productId, int vendorId) throws Exception {
         Product product = productrepository.findById(productId).orElse(null);
         if (product == null) {
             throw new Exception("Product not found");
