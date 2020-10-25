@@ -105,6 +105,21 @@ public class ProductsController {
         }
         return ResponseEntity.ok(response);
     }
+
+    @PatchMapping("/{vendorid}/{productid}/send-for-approval")
+    public ResponseEntity<ApiResponse<Product>> sendForApproval(@PathVariable int vendorid, @PathVariable int productid) {
+        ApiResponse<Product> response = new ApiResponse<>();
+        try {
+            productservice.sendForApproval(vendorid, productid);
+            // response.setData("your product"+productid+"is deleted");
+            response.setMessage("Your product has been sent for approval.");
+        } catch (Exception e) {
+            response.setStatus(500);
+            response.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
 }
 
 
