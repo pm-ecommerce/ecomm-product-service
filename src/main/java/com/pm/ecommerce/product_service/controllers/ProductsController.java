@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/products/")
 public class ProductsController {
 
@@ -57,20 +58,17 @@ public class ProductsController {
     }
 
     @GetMapping("/{vendorid}")
-    public ResponseEntity<ApiResponse<Product>> getAllproducts(@PathVariable int vendorid) {
-
-        ApiResponse<Product> response = new ApiResponse<>();
-
-
+    public ResponseEntity<ApiResponse<List<Product>>> getAllproducts(@PathVariable int vendorid) {
+        ApiResponse<List<Product>> response = new ApiResponse<>();
         try {
-            List<Product> allProducts = productservice.findAllProducts(vendorid);
 
-            response.setData((Product) allProducts);
+            List<Product> allProducts = productservice.findAllProducts(vendorid);
+            response.setData(allProducts);
             response.setMessage("Get All products by vendorid id");
         } catch (Exception e) {
             response.setStatus(500);
-            response.setMessage(e.getMessage());
 
+            response.setMessage(e.getMessage());
         }
         return ResponseEntity.ok(response);
     }
