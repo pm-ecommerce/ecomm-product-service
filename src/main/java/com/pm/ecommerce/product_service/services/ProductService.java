@@ -118,5 +118,35 @@ public class ProductService {
         productrepository.delete(existedproduct);
     }
 
+    public Product sendForApproval(int productId) throws Exception {
+        Product product = productrepository.findById(productId).orElse(null);
+        if (product == null) {
+            throw new Exception("Product not found");
+        }
+        product.setStatus(ProductStatus.WAITING_APPROVAL);
+        productrepository.save(product);
+        return product;
+    }
+
+    public Product approveProduct(int productId) throws Exception {
+        Product product = productrepository.findById(productId).orElse(null);
+        if (product == null) {
+            throw new Exception("Product not found");
+        }
+        product.setStatus(ProductStatus.PUBLISHED);
+        productrepository.save(product);
+        return product;
+    }
+
+    public Product rejectProduct(int productId) throws Exception {
+        Product product = productrepository.findById(productId).orElse(null);
+        if (product == null) {
+            throw new Exception("Product not found");
+        }
+        product.setStatus(ProductStatus.UNAPPROVED);
+        productrepository.save(product);
+        return product;
+    }
+
 
 }
