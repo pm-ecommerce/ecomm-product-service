@@ -1,6 +1,5 @@
 package com.pm.ecommerce.product_service.models;
 
-import com.pm.ecommerce.entities.Category;
 import com.pm.ecommerce.entities.Product;
 import com.pm.ecommerce.enums.ProductStatus;
 import lombok.Data;
@@ -9,29 +8,20 @@ import lombok.Data;
 public class ProductResponse {
 
 
-      int id;
-      String name;
-      double price;
-      ProductStatus status;
-      Category category;
-      CategoryResponse response;
+    int id;
+    String name;
+    double price;
+    ProductStatus status;
+    CategoryResponse category;
 
 
+    public ProductResponse(Product product) {
+        id = product.getId();
+        name = product.getName();
+        price = product.getPrice();
 
-
-      public ProductResponse(Product product){
-
-             id=product.getId();
-             name=product.getName();
-             price=product.getPrice();
-
-             status=product.getStatus();
-           response=new CategoryResponse(product.getCategory());
-
-
-
-
-
-      }
+        status = product.getStatus();
+        category = new CategoryResponse(product.getCategory());
+    }
 
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/products/")
 public class ProductsController {
 
@@ -52,26 +53,22 @@ public class ProductsController {
         return ResponseEntity.ok(response);
     }
 
-
-
-
     @GetMapping("/{vendorid}")
     public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllproductsByVendor(@PathVariable int vendorid) {
         ApiResponse<List<ProductResponse>> response = new ApiResponse<>();
         try {
             List<ProductResponse> allProducts = productservice.findAllProducts(vendorid);
-
             response.setData(allProducts);
             response.setMessage("Get All products by vendorid id");
         } catch (Exception e) {
             response.setStatus(500);
-            response.setMessage(e.getMessage());
 
+            response.setMessage(e.getMessage());
         }
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{statusid}")
+    @GetMapping("/{vendorid}/status/{statusid}")
     public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllproductsBystatus(@PathVariable ProductStatus statusid) {
         ApiResponse<List<ProductResponse>> response = new ApiResponse<>();
         try {
@@ -94,7 +91,7 @@ public class ProductsController {
         try {
             ProductResponse product = productservice.findByproductsByID(vendorid, productid);
             response.setData(product);
-            response.setMessage("your product with Id "+productid);
+            response.setMessage("your product with Id " + productid);
         } catch (Exception e) {
             response.setStatus(500);
             response.setMessage(e.getMessage());
@@ -108,7 +105,7 @@ public class ProductsController {
         ApiResponse<ProductResponse> response = new ApiResponse<>();
 
         try {
-          ProductResponse deletedproduct=  productservice.deleteByproductsByID(vendorid, productid);
+            ProductResponse deletedproduct = productservice.deleteByproductsByID(vendorid, productid);
             response.setData(deletedproduct);
             response.setMessage("your product is removed ");
         } catch (Exception e) {
@@ -123,7 +120,7 @@ public class ProductsController {
     public ResponseEntity<ApiResponse<ProductResponse>> sendForApproval(@PathVariable int vendorid, @PathVariable int productid) {
         ApiResponse<ProductResponse> response = new ApiResponse<>();
         try {
-            ProductResponse sentproduct=productservice.sendForApproval(vendorid, productid);
+            ProductResponse sentproduct = productservice.sendForApproval(vendorid, productid);
             response.setData(sentproduct);
             response.setMessage("Your product has been sent for approval.");
         } catch (Exception e) {
@@ -138,7 +135,7 @@ public class ProductsController {
     public ResponseEntity<ApiResponse<ProductResponse>> approvedProduct(@PathVariable int productid) {
         ApiResponse<ProductResponse> response = new ApiResponse<>();
         try {
-            ProductResponse sentproduct=productservice.approveProduct(productid);
+            ProductResponse sentproduct = productservice.approveProduct(productid);
             response.setData(sentproduct);
             response.setMessage("Congratulations Your product has Approved.");
         } catch (Exception e) {
@@ -153,7 +150,7 @@ public class ProductsController {
     public ResponseEntity<ApiResponse<ProductResponse>> RejectedProduct(@PathVariable int productid) {
         ApiResponse<ProductResponse> response = new ApiResponse<>();
         try {
-            ProductResponse rejectedproduct=productservice.rejectProduct(productid);
+            ProductResponse rejectedproduct = productservice.rejectProduct(productid);
             response.setData(rejectedproduct);
             response.setMessage("Congratulations Your product has Approved.");
         } catch (Exception e) {
