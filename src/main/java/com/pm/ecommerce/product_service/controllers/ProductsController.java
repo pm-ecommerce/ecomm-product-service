@@ -3,6 +3,7 @@ package com.pm.ecommerce.product_service.controllers;
 import com.pm.ecommerce.entities.ApiResponse;
 import com.pm.ecommerce.entities.Product;
 import com.pm.ecommerce.enums.ProductStatus;
+import com.pm.ecommerce.product_service.models.PagedResponse;
 import com.pm.ecommerce.product_service.models.ProductResponse;
 import com.pm.ecommerce.product_service.models.SingleProductResponse;
 import com.pm.ecommerce.product_service.services.ProductService;
@@ -55,10 +56,14 @@ public class ProductsController {
     }
 
     @GetMapping("/{vendorId}")
-    public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllproductsByVendor(@PathVariable int vendorId) {
-        ApiResponse<List<ProductResponse>> response = new ApiResponse<>();
+    public ResponseEntity<ApiResponse<PagedResponse<ProductResponse>>> getAllProductsByVendor(
+            @PathVariable int vendorId,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "perPage", defaultValue = "20") int itemsPerPage
+    ) {
+        ApiResponse<PagedResponse<ProductResponse>> response = new ApiResponse<>();
         try {
-            List<ProductResponse> allProducts = productservice.findAllProducts(vendorId);
+            PagedResponse<ProductResponse> allProducts = productservice.findAllProducts(vendorId, itemsPerPage, page);
             response.setData(allProducts);
             response.setMessage("Get All products by vendor");
         } catch (Exception e) {

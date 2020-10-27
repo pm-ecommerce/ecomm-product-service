@@ -3,10 +3,14 @@ package com.pm.ecommerce.product_service.services;
 import com.pm.ecommerce.entities.*;
 import com.pm.ecommerce.enums.ProductStatus;
 import com.pm.ecommerce.enums.VendorStatus;
+import com.pm.ecommerce.product_service.models.PagedResponse;
 import com.pm.ecommerce.product_service.models.ProductResponse;
 import com.pm.ecommerce.product_service.models.SingleProductResponse;
 import com.pm.ecommerce.product_service.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -206,18 +210,27 @@ public class ProductService {
     }
 
 
-    public List<ProductResponse> findAllProducts(int vendorid) throws Exception {
-        Vendor exisistedvendor = vendorrepository.findByIdAndStatus(vendorid, VendorStatus.APPROVED);
-        if (exisistedvendor == null) {
-            throw new Exception("vendor not exist");
+    public PagedResponse<ProductResponse> findAllProducts(int vendorId, int itemsPerPage, int pageNum) throws Exception {
+        Vendor vendor = vendorrepository.findByIdAndStatus(vendorId, VendorStatus.APPROVED);
+        if (vendor == null) {
+            throw new Exception("Vendor does not exist");
         }
 
-        return productrepository.findAllByVendorId(vendorid).stream().map(ProductResponse::new).collect(Collectors.toList());
+        if (pageNum < 1) {
+            throw new Exception("Page number is invalid.");
+        }
+
+        Pageable paging = PageRequest.of(pageNum - 1, itemsPerPage);
+        Page<Product> pagedResult = productrepository.findAllByVendorId(vendorId, paging);
+
+        int totalPages = pagedResult.getTotalPages();
+
+        List<ProductResponse> products = pagedResult.toList().stream().map(ProductResponse::new).collect(Collectors.toList());
+
+        return new PagedResponse<>(totalPages, pageNum, itemsPerPage, products);
     }
 
     public List<ProductResponse> findAllProductsByStatus(ProductStatus status) throws Exception {
-
-
         return productrepository.findAllByStatus(status).stream().map(ProductResponse::new).collect(Collectors.toList());
     }
 
