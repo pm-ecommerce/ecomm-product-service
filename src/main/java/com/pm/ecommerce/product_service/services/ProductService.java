@@ -72,11 +72,12 @@ public class ProductService {
 
     public ProductResponse updateproduct(Product product, int vendorid, int productid) throws Exception {
 
+
         if (product == null) {
             throw new Exception("Data expected with this request.");
         }
 
-        Product pro = productrepository.findByIdAndVendorId(productid, vendorid);
+       Product pro = productrepository.findByIdAndVendorId(productid, vendorid);
         if (pro == null) {
             throw new Exception("find exception");
         }
@@ -88,9 +89,11 @@ public class ProductService {
                 throw new Exception("your product was not found");
             }
 
+
             if (product.getDescription() == null && product.getName() == null && product.getPrice() <= 0) {
                 throw new Exception("you have to fill all detail of Product");
             }
+
 
             if (product.getName() != null && product.getName().length() > 0) {
                 Product existing = productrepository.findOneBySlug(generateslug(product.getName(), vendorid));

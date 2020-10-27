@@ -34,7 +34,7 @@ public class ProductsController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{vendourid}/{productid}")
+    @PutMapping("/{vendourid}/{productid}")
     public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(@RequestBody Product product,
                                                                       @PathVariable int vendourid,
                                                                       @PathVariable int productid) throws Exception {
