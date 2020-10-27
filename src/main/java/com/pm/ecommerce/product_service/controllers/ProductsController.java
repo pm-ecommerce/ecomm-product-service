@@ -4,6 +4,7 @@ import com.pm.ecommerce.entities.ApiResponse;
 import com.pm.ecommerce.entities.Product;
 import com.pm.ecommerce.enums.ProductStatus;
 import com.pm.ecommerce.product_service.models.ProductResponse;
+import com.pm.ecommerce.product_service.models.SingleProductResponse;
 import com.pm.ecommerce.product_service.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ public class ProductsController {
     public ResponseEntity<ApiResponse<ProductResponse>> createProduct(@RequestBody() Product product, @PathVariable int vendorid) {
         ApiResponse<ProductResponse> response = new ApiResponse<>();
         try {
-            ProductResponse created = productservice.creatproduct(product, vendorid);
+            ProductResponse created = productservice.creatProduct(product, vendorid);
             response.setStatus(200);
             response.setData(created);
             response.setMessage("successfully created category");
@@ -85,11 +86,11 @@ public class ProductsController {
     }
 
     @GetMapping("/{vendorid}/{productid}")
-    public ResponseEntity<ApiResponse<ProductResponse>> getproductid(@PathVariable int vendorid, @PathVariable int productid) {
-        ApiResponse<ProductResponse> response = new ApiResponse<>();
+    public ResponseEntity<ApiResponse<SingleProductResponse>> getproductid(@PathVariable int vendorid, @PathVariable int productid) {
+        ApiResponse<SingleProductResponse> response = new ApiResponse<>();
 
         try {
-            ProductResponse product = productservice.findByproductsByID(vendorid, productid);
+            SingleProductResponse product = productservice.findByproductsByID(vendorid, productid);
             response.setData(product);
             response.setMessage("your product with Id " + productid);
         } catch (Exception e) {
