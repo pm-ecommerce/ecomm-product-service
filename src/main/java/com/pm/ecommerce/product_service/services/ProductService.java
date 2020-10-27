@@ -80,12 +80,11 @@ public class ProductService {
     }
 
     public ProductResponse updateproduct(Product product, int vendorid, int productid) throws Exception {
-
         if (product == null) {
             throw new Exception("Data expected with this request.");
         }
 
-        Product pro = productrepository.findByIdAndVendorId(productid, vendorid);
+       Product pro = productrepository.findByIdAndVendorId(productid, vendorid);
         if (pro == null) {
             throw new Exception("find exception");
         }
@@ -159,9 +158,7 @@ public class ProductService {
 
         product.setStatus(ProductStatus.UPDATED);
 
-        productrepository.save(existingProduct);
-        Product updated = productrepository.findById(existingProduct.getId()).orElse(null);
-        return new ProductResponse(updated);
+        return new ProductResponse(productrepository.save(existingProduct));
     }
 
     private void updateAttributes(Product existing, Product update) {
