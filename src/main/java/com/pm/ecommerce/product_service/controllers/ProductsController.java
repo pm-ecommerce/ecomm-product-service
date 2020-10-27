@@ -21,11 +21,11 @@ public class ProductsController {
     @Autowired
     ProductService productservice;
 
-    @PostMapping("/{vendorid}")
-    public ResponseEntity<ApiResponse<ProductResponse>> createProduct(@RequestBody() Product product, @PathVariable int vendorid) {
+    @PostMapping("/{vendorId}")
+    public ResponseEntity<ApiResponse<ProductResponse>> createProduct(@RequestBody() Product product, @PathVariable int vendorId) {
         ApiResponse<ProductResponse> response = new ApiResponse<>();
         try {
-            ProductResponse created = productservice.creatProduct(product, vendorid);
+            ProductResponse created = productservice.creatProduct(product, vendorId);
             response.setStatus(200);
             response.setData(created);
             response.setMessage("successfully created category");
@@ -36,13 +36,13 @@ public class ProductsController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{vendourid}/{productid}")
+    @PatchMapping("/{vendorId}/{productId}")
     public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(@RequestBody Product product,
-                                                                      @PathVariable int vendourid,
-                                                                      @PathVariable int productid) throws Exception {
+                                                                      @PathVariable int vendorId,
+                                                                      @PathVariable int productId) throws Exception {
         ApiResponse<ProductResponse> response = new ApiResponse<>();
         try {
-            ProductResponse updated = productservice.updateproduct(product, vendourid, productid);
+            ProductResponse updated = productservice.updateproduct(product, vendorId, productId);
             response.setMessage("update product successfully");
             response.setStatus(200);
 
@@ -54,13 +54,13 @@ public class ProductsController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{vendorid}")
-    public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllproductsByVendor(@PathVariable int vendorid) {
+    @GetMapping("/{vendorId}")
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllproductsByVendor(@PathVariable int vendorId) {
         ApiResponse<List<ProductResponse>> response = new ApiResponse<>();
         try {
-            List<ProductResponse> allProducts = productservice.findAllProducts(vendorid);
+            List<ProductResponse> allProducts = productservice.findAllProducts(vendorId);
             response.setData(allProducts);
-            response.setMessage("Get All products by vendorid id");
+            response.setMessage("Get All products by vendor");
         } catch (Exception e) {
             response.setStatus(500);
 
@@ -69,7 +69,7 @@ public class ProductsController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{vendorid}/status/{statusid}")
+    @GetMapping("/{vendorId}/status/{statusid}")
     public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllproductsBystatus(@PathVariable ProductStatus statusid) {
         ApiResponse<List<ProductResponse>> response = new ApiResponse<>();
         try {
@@ -85,14 +85,14 @@ public class ProductsController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{vendorid}/{productid}")
-    public ResponseEntity<ApiResponse<SingleProductResponse>> getproductid(@PathVariable int vendorid, @PathVariable int productid) {
+    @GetMapping("/{vendorId}/{productId}")
+    public ResponseEntity<ApiResponse<SingleProductResponse>> getproductId(@PathVariable int vendorId, @PathVariable int productId) {
         ApiResponse<SingleProductResponse> response = new ApiResponse<>();
 
         try {
-            SingleProductResponse product = productservice.findByproductsByID(vendorid, productid);
+            SingleProductResponse product = productservice.findByproductsByID(vendorId, productId);
             response.setData(product);
-            response.setMessage("your product with Id " + productid);
+            response.setMessage("your product with Id " + productId);
         } catch (Exception e) {
             response.setStatus(500);
             response.setMessage(e.getMessage());
@@ -101,12 +101,12 @@ public class ProductsController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{vendorid}/{productid}")
-    public ResponseEntity<ApiResponse<ProductResponse>> deleteproductsid(@PathVariable int vendorid, @PathVariable int productid) {
+    @DeleteMapping("/{vendorId}/{productId}")
+    public ResponseEntity<ApiResponse<ProductResponse>> deleteproductsid(@PathVariable int vendorId, @PathVariable int productId) {
         ApiResponse<ProductResponse> response = new ApiResponse<>();
 
         try {
-            ProductResponse deletedproduct = productservice.deleteByproductsByID(vendorid, productid);
+            ProductResponse deletedproduct = productservice.deleteByproductsByID(vendorId, productId);
             response.setData(deletedproduct);
             response.setMessage("your product is removed ");
         } catch (Exception e) {
@@ -117,11 +117,11 @@ public class ProductsController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{vendorid}/{productid}/send-for-approval")
-    public ResponseEntity<ApiResponse<ProductResponse>> sendForApproval(@PathVariable int vendorid, @PathVariable int productid) {
+    @PatchMapping("/{vendorId}/{productId}/send-for-approval")
+    public ResponseEntity<ApiResponse<ProductResponse>> sendForApproval(@PathVariable int vendorId, @PathVariable int productId) {
         ApiResponse<ProductResponse> response = new ApiResponse<>();
         try {
-            ProductResponse sentproduct = productservice.sendForApproval(vendorid, productid);
+            ProductResponse sentproduct = productservice.sendForApproval(vendorId, productId);
             response.setData(sentproduct);
             response.setMessage("Your product has been sent for approval.");
         } catch (Exception e) {
@@ -132,11 +132,11 @@ public class ProductsController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{productid}/approvad-product")
-    public ResponseEntity<ApiResponse<ProductResponse>> approvedProduct(@PathVariable int productid) {
+    @PatchMapping("/{productId}/approvad-product")
+    public ResponseEntity<ApiResponse<ProductResponse>> approvedProduct(@PathVariable int productId) {
         ApiResponse<ProductResponse> response = new ApiResponse<>();
         try {
-            ProductResponse sentproduct = productservice.approveProduct(productid);
+            ProductResponse sentproduct = productservice.approveProduct(productId);
             response.setData(sentproduct);
             response.setMessage("Congratulations Your product has Approved.");
         } catch (Exception e) {
@@ -147,11 +147,11 @@ public class ProductsController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{productid}/rejected-product")
-    public ResponseEntity<ApiResponse<ProductResponse>> RejectedProduct(@PathVariable int productid) {
+    @PatchMapping("/{productId}/rejected-product")
+    public ResponseEntity<ApiResponse<ProductResponse>> RejectedProduct(@PathVariable int productId) {
         ApiResponse<ProductResponse> response = new ApiResponse<>();
         try {
-            ProductResponse rejectedproduct = productservice.rejectProduct(productid);
+            ProductResponse rejectedproduct = productservice.rejectProduct(productId);
             response.setData(rejectedproduct);
             response.setMessage("Congratulations Your product has Approved.");
         } catch (Exception e) {

@@ -1,19 +1,18 @@
 package com.pm.ecommerce.product_service.services;
 
-import com.pm.ecommerce.entities.Category;
-import com.pm.ecommerce.entities.Product;
-import com.pm.ecommerce.entities.Vendor;
+import com.pm.ecommerce.entities.*;
 import com.pm.ecommerce.enums.ProductStatus;
 import com.pm.ecommerce.enums.VendorStatus;
 import com.pm.ecommerce.product_service.models.ProductResponse;
 import com.pm.ecommerce.product_service.models.SingleProductResponse;
-import com.pm.ecommerce.product_service.repositories.CategoryRepository;
-import com.pm.ecommerce.product_service.repositories.ProductRepository;
-import com.pm.ecommerce.product_service.repositories.VendorRepository;
+import com.pm.ecommerce.product_service.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +25,12 @@ public class ProductService {
 
     @Autowired
     VendorRepository vendorrepository;
+
+    @Autowired
+    ImageRepository imagRepository;
+
+    @Autowired
+    ProductAttributeRepository attributeRepository;
 
 
     protected String generateSlug(String str, int vendorId) {
@@ -139,18 +144,65 @@ public class ProductService {
         }
 
         // TODO: Handle Delete, Update and Add properly
-        if (product.getAttributes() != null && product.getAttributes().size() > 0) {
-            existingProduct.setAttributes(product.getAttributes());
+        if (product.getAttributes() != null) {
+            updateAttributes(existingProduct, product);
         }
 
         // TODO: Handle Delete, Update and Add properly
-        if (product.getImages() != null && product.getImages().size() > 0) {
-            existingProduct.setImages(product.getImages());
+        if (product.getImages() != null) {
+            updateImages(existingProduct, product);
         }
 
         product.setStatus(ProductStatus.UPDATED);
 
-        return new ProductResponse(productrepository.save(existingProduct));
+        productrepository.save(existingProduct);
+        Product updated = productrepository.findById(existingProduct.getId()).orElse(null);
+        return new ProductResponse(updated);
+    }
+
+    private void updateAttributes(Product existing, Product update) {
+        // current attributes
+        Set<ProductAttribute> current = existing.getAttributes();
+        Map<Integer, ProductAttribute> map = new HashMap<>();
+        current.forEach(e -> {
+            map.put(e.getId(), e);
+        });
+
+        // deleted attributes
+        Set<Integer> updated = update.getAttributes().stream().filter(e -> e.getId() > 0).map(ProductAttribute::getId).collect(Collectors.toSet());
+        current.removeIf(e -> !updated.contains(e.getId()));
+
+        //updated attributes
+        update.getAttributes().stream().filter(e -> e.getId() > 0).forEach(e -> {
+            Set<Option> currentOptions = map.get(e.getId()).getOptions();
+            //added and updated
+            Set<Option> newOptions = e.getOptions()
+                    .stream()
+                    .filter(option -> option.getId() == 0 || !currentOptions.contains(option))
+                    .collect(Collectors.toSet());
+
+            //remove option
+            currentOptions.removeIf(option -> !e.getOptions().contains(option));
+
+            currentOptions.addAll(newOptions);
+        });
+
+        // new attributes
+        Set<ProductAttribute> newAttributes = update.getAttributes().stream().filter(e -> e.getId() == 0).collect(Collectors.toSet());
+        current.addAll(newAttributes);
+    }
+
+    private void updateImages(Product existing, Product update) {
+        // current images
+        Set<Image> current = existing.getImages();
+
+        // deleted images
+        Set<Long> updated = update.getImages().stream().filter(e -> e.getId() > 0).map(Image::getId).collect(Collectors.toSet());
+        current.removeIf(image -> !updated.contains(image.getId()));
+
+        // new images
+        Set<Image> images = update.getImages().stream().filter(e -> e.getId() == 0).collect(Collectors.toSet());
+        current.addAll(images);
     }
 
 

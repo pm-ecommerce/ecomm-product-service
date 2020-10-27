@@ -6,7 +6,7 @@ import com.pm.ecommerce.entities.ProductAttribute;
 import com.pm.ecommerce.enums.ProductStatus;
 import lombok.Data;
 
-import java.util.List;
+import java.util.Set;
 
 @Data
 public class SingleProductResponse {
@@ -17,8 +17,8 @@ public class SingleProductResponse {
     double price;
     ProductStatus status;
     CategoryResponse category;
-    List<ProductAttribute> attributes;
-    List<Image> images;
+    Set<ProductAttribute> attributes;
+    Set<Image> images;
 
     public SingleProductResponse(Product product) {
         id = product.getId();

@@ -20,11 +20,11 @@ public class CategoriesController {
     @Autowired
     CategoryService categoryservice;
 
-    @PostMapping("/{vendorsid}")
-    public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@Valid @RequestBody Category category, @PathVariable int vendorsid) {
+    @PostMapping("")
+    public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@Valid @RequestBody Category category) {
         ApiResponse<CategoryResponse> response = new ApiResponse<>();
         try {
-            CategoryResponse created = categoryservice.createCategory(category, vendorsid);
+            CategoryResponse created = categoryservice.createCategory(category);
             response.setStatus(200);
             response.setData(created);
             response.setMessage("successfully created category");
@@ -35,13 +35,13 @@ public class CategoriesController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{vendorid}")
-    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllcategories(@PathVariable int vendorid) {
+    @GetMapping("")
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllcategories() {
         ApiResponse<List<CategoryResponse>> response = new ApiResponse<>();
         try {
-            List<CategoryResponse> allcatagories = categoryservice.findAllCategories(vendorid);
-            response.setData(allcatagories);
-            response.setMessage("Get All categories by vendorid id");
+            List<CategoryResponse> allcategories = categoryservice.findAllCategories();
+            response.setData(allcategories);
+            response.setMessage("Get All categories");
         } catch (Exception e) {
             response.setStatus(500);
             response.setMessage(e.getMessage());
@@ -50,13 +50,13 @@ public class CategoriesController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{vendorid}/{categoryid}")
-    public ResponseEntity<ApiResponse<CategoryResponse>> getcatagory(@PathVariable int vendorid, @PathVariable int categoryid) {
+    @GetMapping("/{categoryId}")
+    public ResponseEntity<ApiResponse<CategoryResponse>> getCategory(@PathVariable int categoryId) {
         ApiResponse<CategoryResponse> response = new ApiResponse<>();
         try {
-            CategoryResponse category = categoryservice.findBycatagoriesbyID(vendorid, categoryid);
+            CategoryResponse category = categoryservice.findCategoryByID(categoryId);
             response.setData(category);
-            response.setMessage("Get categories by id");
+            response.setMessage("Get category by id");
         } catch (Exception e) {
             response.setStatus(500);
             response.setMessage(e.getMessage());
