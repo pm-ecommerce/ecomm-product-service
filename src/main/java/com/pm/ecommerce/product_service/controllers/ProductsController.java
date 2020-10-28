@@ -29,7 +29,7 @@ public class ProductsController {
             ProductResponse created = productservice.creatProduct(product, vendorId);
             response.setStatus(200);
             response.setData(created);
-            response.setMessage("successfully created category");
+            response.setMessage("successfully created Products");
         } catch (Exception e) {
             response.setMessage(e.getMessage());
             response.setStatus(500);
@@ -59,8 +59,8 @@ public class ProductsController {
     public ResponseEntity<ApiResponse<PagedResponse<ProductResponse>>> getAllProductsByVendor(
             @PathVariable int vendorId,
             @RequestParam(name = "page", defaultValue = "1") int page,
-            @RequestParam(name = "perPage", defaultValue = "20") int itemsPerPage
-    ) {
+            @RequestParam(name = "perPage", defaultValue = "20") int itemsPerPage)
+    {
         ApiResponse<PagedResponse<ProductResponse>> response = new ApiResponse<>();
         try {
             PagedResponse<ProductResponse> allProducts = productservice.findAllProducts(vendorId, itemsPerPage, page);
@@ -74,28 +74,34 @@ public class ProductsController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{vendorId}/status/{statusid}")
-    public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllproductsBystatus(@PathVariable ProductStatus statusid) {
-        ApiResponse<List<ProductResponse>> response = new ApiResponse<>();
-        try {
-            List<ProductResponse> allProducts = productservice.findAllProductsByStatus(statusid);
 
+    @GetMapping("/{vendorId}/status/{statusid}")
+    public ResponseEntity<ApiResponse<PagedResponse<ProductResponse>>> getAllproductsBystatus(
+            @PathVariable int vendorId,
+            @PathVariable ProductStatus statusid,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "perPage", defaultValue = "20") int itemsPerPage)
+    {
+        ApiResponse<PagedResponse<ProductResponse>> response = new ApiResponse<>();
+        try {
+            PagedResponse<ProductResponse> allProducts = productservice.findAllProductsByStatus(vendorId,statusid, itemsPerPage, page);
             response.setData(allProducts);
-            response.setMessage("Get All products by status id");
+            response.setMessage("Get All products by status");
         } catch (Exception e) {
             response.setStatus(500);
-            response.setMessage(e.getMessage());
 
+            response.setMessage(e.getMessage());
         }
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{vendorId}/{productId}")
+
+   @GetMapping("/{vendorId}/{productId}")
     public ResponseEntity<ApiResponse<SingleProductResponse>> getproductId(@PathVariable int vendorId, @PathVariable int productId) {
         ApiResponse<SingleProductResponse> response = new ApiResponse<>();
 
         try {
-            SingleProductResponse product = productservice.findByproductsByID(vendorId, productId);
+            SingleProductResponse product = productservice.findSingleproductProducts(vendorId, productId);
             response.setData(product);
             response.setMessage("your product with Id " + productId);
         } catch (Exception e) {
@@ -158,7 +164,7 @@ public class ProductsController {
         try {
             ProductResponse rejectedproduct = productservice.rejectProduct(productId);
             response.setData(rejectedproduct);
-            response.setMessage("Congratulations Your product has Approved.");
+            response.setMessage("your product is unapproved.");
         } catch (Exception e) {
             response.setStatus(500);
             response.setMessage(e.getMessage());
