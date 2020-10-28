@@ -37,7 +37,6 @@ public class ProductService {
     @Autowired
     EntityManager em;
 
-
     protected String generateSlug(String str, int vendorId) {
         return vendorId + "-" + str.toLowerCase().replaceAll("[\\s+]", "-");
     }
@@ -134,9 +133,10 @@ public class ProductService {
             existingProduct.setDescription(product.getDescription());
         }
 
+        // add validation for subcategory
+
         if (product.getPrice() >= 0 && existingProduct.getPrice() != product.getPrice()) {
             existingProduct.setPrice(product.getPrice());
-
         }
 
         if (product.getName() != null && product.getName().length() > 0) {
@@ -235,6 +235,25 @@ public class ProductService {
         return new PagedResponse<>(totalPages, pageNum, itemsPerPage, products);
     }
 
+    public PagedResponse<ProductResponse> findAllProducts(int itemsPerPage, int pageNum) throws Exception {
+        if (pageNum < 1) {
+            throw new Exception("Page number is invalid.");
+        }
+
+        Pageable paging = PageRequest.of(pageNum - 1, itemsPerPage);
+
+        List<ProductStatus> statusList = new ArrayList<>();
+        statusList.add(ProductStatus.PUBLISHED);
+
+        Page<Product> pagedResult = productrepository.findAllByStatusIn(statusList, paging);
+
+        int totalPages = pagedResult.getTotalPages();
+
+        List<ProductResponse> products = pagedResult.toList().stream().map(ProductResponse::new).collect(Collectors.toList());
+
+        return new PagedResponse<>(totalPages, pageNum, itemsPerPage, products);
+    }
+
     public PagedResponse<ProductResponse> findAllProductsByStatus(int vendorId, ProductStatus stausid, int itemsPerPage, int pageNum) throws Exception {
         Vendor vendor = vendorrepository.findByIdAndStatus(vendorId, VendorStatus.APPROVED);
 
@@ -256,8 +275,22 @@ public class ProductService {
         return new PagedResponse<>(totalPages, pageNum, itemsPerPage, products);
     }
 
-    public ProductResponse deleteByproductsByID(int vendorid, int productid) throws Exception {
+    public PagedResponse<ProductResponse> findAllProductsByStatus(ProductStatus stausid, int itemsPerPage, int pageNum) throws Exception {
+        if (pageNum < 1) {
+            throw new Exception("Page number is invalid.");
+        }
 
+        Pageable paging = PageRequest.of(pageNum - 1, itemsPerPage);
+        Page<Product> pagedResult = productrepository.findAllByStatus(stausid, paging);
+
+        int totalPages = pagedResult.getTotalPages();
+
+        List<ProductResponse> products = pagedResult.toList().stream().map(ProductResponse::new).collect(Collectors.toList());
+
+        return new PagedResponse<>(totalPages, pageNum, itemsPerPage, products);
+    }
+
+    public ProductResponse deleteByproductsByID(int vendorid, int productid) throws Exception {
         Vendor approvedvendor = vendorrepository.findByIdAndStatus(vendorid, VendorStatus.APPROVED);
         if (approvedvendor == null) {
 

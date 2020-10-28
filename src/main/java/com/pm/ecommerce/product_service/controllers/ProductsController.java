@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/api/products/")
+@RequestMapping("/api/products")
 public class ProductsController {
 
     @Autowired
@@ -38,7 +38,7 @@ public class ProductsController {
     @PatchMapping("/{vendorId}/{productId}")
     public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(@RequestBody Product product,
                                                                       @PathVariable int vendorId,
-                                                                      @PathVariable int productId) throws Exception {
+                                                                      @PathVariable int productId){
         ApiResponse<ProductResponse> response = new ApiResponse<>();
         try {
             ProductResponse updated = productservice.updateproduct(product, vendorId, productId);
@@ -71,6 +71,22 @@ public class ProductsController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("")
+    public ResponseEntity<ApiResponse<PagedResponse<ProductResponse>>> getAllProducts(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "perPage", defaultValue = "20") int itemsPerPage) {
+        ApiResponse<PagedResponse<ProductResponse>> response = new ApiResponse<>();
+        try {
+            PagedResponse<ProductResponse> allProducts = productservice.findAllProducts(itemsPerPage, page);
+            response.setData(allProducts);
+            response.setMessage("Get All products by vendor");
+        } catch (Exception e) {
+            response.setStatus(500);
+            response.setMessage(e.getMessage());
+        }
+
+        return ResponseEntity.ok(response);
+    }
 
     @GetMapping("/{vendorId}/status/{statusid}")
     public ResponseEntity<ApiResponse<PagedResponse<ProductResponse>>> getAllproductsBystatus(
@@ -92,6 +108,24 @@ public class ProductsController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/status/{statusid}")
+    public ResponseEntity<ApiResponse<PagedResponse<ProductResponse>>> getAllproductsBystatus(
+            @PathVariable ProductStatus statusid,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "perPage", defaultValue = "20") int itemsPerPage) {
+        ApiResponse<PagedResponse<ProductResponse>> response = new ApiResponse<>();
+        try {
+            PagedResponse<ProductResponse> allProducts = productservice.findAllProductsByStatus(statusid, itemsPerPage, page);
+            response.setData(allProducts);
+            response.setMessage("Get All products by status");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(500);
+            response.setMessage(e.getMessage());
+        }
+
+        return ResponseEntity.ok(response);
+    }
 
     @GetMapping("/{vendorId}/{productId}")
     public ResponseEntity<ApiResponse<SingleProductResponse>> getproductId(@PathVariable int vendorId, @PathVariable int productId) {
@@ -140,7 +174,7 @@ public class ProductsController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{productId}/approvad-product")
+    @PatchMapping("/{productId}/approve")
     public ResponseEntity<ApiResponse<ProductResponse>> approvedProduct(@PathVariable int productId) {
         ApiResponse<ProductResponse> response = new ApiResponse<>();
         try {
@@ -155,7 +189,7 @@ public class ProductsController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{productId}/rejected-product")
+    @PatchMapping("/{productId}/reject")
     public ResponseEntity<ApiResponse<ProductResponse>> RejectedProduct(@PathVariable int productId) {
         ApiResponse<ProductResponse> response = new ApiResponse<>();
         try {
