@@ -13,10 +13,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import javax.persistence.EntityManager;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +33,9 @@ public class ProductService {
 
     @Autowired
     ProductAttributeRepository attributeRepository;
+
+    @Autowired
+    EntityManager em;
 
 
     protected String generateSlug(String str, int vendorId) {
@@ -62,9 +63,9 @@ public class ProductService {
             throw new Exception("Vendor does not exist.");
         }
 
-        Category existingCategory = categoryrepository.findByIdAndVendorIdAndIsDeleted(product.getCategory().getId(), vendorid, false);
+        Category existingCategory = categoryrepository.findById(product.getCategory().getId()).orElse(null);
 
-        if (existingCategory == null) {
+        if (existingCategory == null || existingCategory.isDeleted()) {
             throw new Exception("You are trying to add a product is an unknown category.");
         }
 
@@ -84,7 +85,7 @@ public class ProductService {
             throw new Exception("Data expected with this request.");
         }
 
-       Product pro = productrepository.findByIdAndVendorId(productid, vendorid);
+        Product pro = productrepository.findByIdAndVendorId(productid, vendorid);
         if (pro == null) {
             throw new Exception("find exception");
         }
@@ -93,6 +94,10 @@ public class ProductService {
         Product existingProduct = productrepository.findById(productid).orElse(null);
         if (existingProduct == null) {
             throw new Exception("your product was not found");
+        }
+
+        if (existingProduct.getVendor().getId() != vendorid) {
+            throw new Exception("Product does not belong to selected vendor.");
         }
 
         if (product.getDescription() == null && product.getName() == null && product.getPrice() <= 0) {
@@ -113,30 +118,26 @@ public class ProductService {
         }
 
         if (product.getCategory() == null) {
-            Category existingCategory = categoryrepository.findByIdAndVendorIdAndIsDeleted(existingProduct.getCategory().getId(), vendorid, false);
-            if (existingCategory == null) {
+            Category existingCategory = categoryrepository.findById(existingProduct.getCategory().getId()).orElse(null);
+            if (existingCategory == null || existingCategory.isDeleted()) {
                 throw new Exception("Category does not exist.");
             }
         } else if (product.getCategory() != null) {
-            Category existingCategory = categoryrepository.findByIdAndVendorIdAndIsDeleted(product.getCategory().getId(),
-                    vendorid, false);
-            {
-                if (existingCategory == null) {
-                    throw new Exception("Category does not exist.");
-                }
-                existingProduct.setCategory(existingCategory);
+            Category existingCategory = categoryrepository.findById(product.getCategory().getId()).orElse(null);
+            if (existingCategory == null || existingCategory.isDeleted()) {
+                throw new Exception("Category does not exist.");
             }
+            existingProduct.setCategory(existingCategory);
         }
 
         if (product.getDescription() != null && !existingProduct.getDescription().equals(product.getDescription())) {
             existingProduct.setDescription(product.getDescription());
         }
 
+        if (product.getPrice() >= 0 && existingProduct.getPrice() != product.getPrice()) {
+            existingProduct.setPrice(product.getPrice());
 
-             if (product.getPrice() >= 0 && existingProduct.getPrice() != product.getPrice()) {
-                 existingProduct.setPrice(product.getPrice());
-
-         }
+        }
 
         if (product.getName() != null && product.getName().length() > 0) {
             existingProduct.setName(product.getName());
@@ -208,7 +209,6 @@ public class ProductService {
         current.addAll(images);
     }
 
-
     public PagedResponse<ProductResponse> findAllProducts(int vendorId, int itemsPerPage, int pageNum) throws Exception {
         Vendor vendor = vendorrepository.findByIdAndStatus(vendorId, VendorStatus.APPROVED);
         if (vendor == null) {
@@ -220,7 +220,13 @@ public class ProductService {
         }
 
         Pageable paging = PageRequest.of(pageNum - 1, itemsPerPage);
-        Page<Product> pagedResult = productrepository.findAllByVendorId(vendorId, paging);
+
+        List<ProductStatus> statusList = new ArrayList<>();
+        statusList.add(ProductStatus.CREATED);
+        statusList.add(ProductStatus.UPDATED);
+        statusList.add(ProductStatus.PUBLISHED);
+
+        Page<Product> pagedResult = productrepository.findAllByVendorIdAndStatusIn(vendorId, statusList, paging);
 
         int totalPages = pagedResult.getTotalPages();
 
@@ -229,7 +235,7 @@ public class ProductService {
         return new PagedResponse<>(totalPages, pageNum, itemsPerPage, products);
     }
 
-    public PagedResponse<ProductResponse> findAllProductsByStatus(int vendorId,ProductStatus stausid ,int itemsPerPage, int pageNum) throws Exception {
+    public PagedResponse<ProductResponse> findAllProductsByStatus(int vendorId, ProductStatus stausid, int itemsPerPage, int pageNum) throws Exception {
         Vendor vendor = vendorrepository.findByIdAndStatus(vendorId, VendorStatus.APPROVED);
 
         if (vendor == null) {
@@ -240,9 +246,8 @@ public class ProductService {
             throw new Exception("Page number is invalid.");
         }
 
-
         Pageable paging = PageRequest.of(pageNum - 1, itemsPerPage);
-        Page<Product> pagedResult = productrepository.findAllByStatus(stausid,paging);
+        Page<Product> pagedResult = productrepository.findAllByVendorIdAndStatus(vendorId, stausid, paging);
 
         int totalPages = pagedResult.getTotalPages();
 
@@ -264,44 +269,43 @@ public class ProductService {
             throw new Exception("your file not found");
         }
 
-
         productrepository.delete(existedproduct);
         return new ProductResponse(existedproduct);
     }
 
-
-
-    public SingleProductResponse findSingleproductProducts(int vendorid,int productid) throws Exception {
+    public SingleProductResponse findSingleproductProducts(int vendorid, int productid) throws Exception {
         Vendor exisistedvendor = vendorrepository.findByIdAndStatus(vendorid, VendorStatus.APPROVED);
-        Product existed=productrepository.findByIdAndVendorId(productid,vendorid);
-        if(existed==null||exisistedvendor==null){
+        Product existed = productrepository.findByIdAndVendorId(productid, vendorid);
+        if (existed == null || exisistedvendor == null) {
 
             throw new Exception("your file not recorded");
         }
 
         return new SingleProductResponse(existed);
-
-
     }
 
-
     public ProductResponse sendForApproval(int vendorId, int productId) throws Exception {
-       Product foundProduct = productrepository.findById(productId).orElse(null);
-        //Product sent=productrepository.findByIdAndStatus(productId,ProductStatus.CREATED);
-        System.out.println("****************************************"+foundProduct);
-        Vendor existedvendor = vendorrepository.findByIdAndStatus(vendorId, VendorStatus.APPROVED);
-        if(existedvendor==null){
-            throw new Exception(" you are not approved vendor Yet");
+        Product foundProduct = productrepository.findById(productId).orElse(null);
 
+        if (foundProduct == null) {
+            throw new Exception("Product does not exist.");
         }
 
-                if(foundProduct.getStatus()==ProductStatus.CREATED||foundProduct.getStatus()==ProductStatus.UPDATED){
+        if (foundProduct.getVendor().getId() != vendorId) {
+            throw new Exception("Product does not belong to selected vendor.");
+        }
 
-                    foundProduct.setStatus(ProductStatus.WAITING_APPROVAL);
-                }
+        Vendor existedvendor = vendorrepository.findByIdAndStatus(vendorId, VendorStatus.APPROVED);
+        if (existedvendor == null) {
+            throw new Exception(" you are not approved vendor Yet");
+        }
 
-                productrepository.save(foundProduct);
-              return new ProductResponse(foundProduct);
+        if (foundProduct.getStatus() == ProductStatus.CREATED || foundProduct.getStatus() == ProductStatus.UPDATED) {
+            foundProduct.setStatus(ProductStatus.WAITING_APPROVAL);
+            productrepository.save(foundProduct);
+        }
+
+        return new ProductResponse(foundProduct);
     }
 
     public ProductResponse approveProduct(int productId) throws Exception {

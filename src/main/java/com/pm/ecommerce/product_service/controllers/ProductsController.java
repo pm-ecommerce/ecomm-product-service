@@ -12,8 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @CrossOrigin
 @RequestMapping("/api/products/")
@@ -59,8 +57,7 @@ public class ProductsController {
     public ResponseEntity<ApiResponse<PagedResponse<ProductResponse>>> getAllProductsByVendor(
             @PathVariable int vendorId,
             @RequestParam(name = "page", defaultValue = "1") int page,
-            @RequestParam(name = "perPage", defaultValue = "20") int itemsPerPage)
-    {
+            @RequestParam(name = "perPage", defaultValue = "20") int itemsPerPage) {
         ApiResponse<PagedResponse<ProductResponse>> response = new ApiResponse<>();
         try {
             PagedResponse<ProductResponse> allProducts = productservice.findAllProducts(vendorId, itemsPerPage, page);
@@ -68,9 +65,9 @@ public class ProductsController {
             response.setMessage("Get All products by vendor");
         } catch (Exception e) {
             response.setStatus(500);
-
             response.setMessage(e.getMessage());
         }
+
         return ResponseEntity.ok(response);
     }
 
@@ -80,23 +77,23 @@ public class ProductsController {
             @PathVariable int vendorId,
             @PathVariable ProductStatus statusid,
             @RequestParam(name = "page", defaultValue = "1") int page,
-            @RequestParam(name = "perPage", defaultValue = "20") int itemsPerPage)
-    {
+            @RequestParam(name = "perPage", defaultValue = "20") int itemsPerPage) {
         ApiResponse<PagedResponse<ProductResponse>> response = new ApiResponse<>();
         try {
-            PagedResponse<ProductResponse> allProducts = productservice.findAllProductsByStatus(vendorId,statusid, itemsPerPage, page);
+            PagedResponse<ProductResponse> allProducts = productservice.findAllProductsByStatus(vendorId, statusid, itemsPerPage, page);
             response.setData(allProducts);
             response.setMessage("Get All products by status");
         } catch (Exception e) {
+            e.printStackTrace();
             response.setStatus(500);
-
             response.setMessage(e.getMessage());
         }
+
         return ResponseEntity.ok(response);
     }
 
 
-   @GetMapping("/{vendorId}/{productId}")
+    @GetMapping("/{vendorId}/{productId}")
     public ResponseEntity<ApiResponse<SingleProductResponse>> getproductId(@PathVariable int vendorId, @PathVariable int productId) {
         ApiResponse<SingleProductResponse> response = new ApiResponse<>();
 
