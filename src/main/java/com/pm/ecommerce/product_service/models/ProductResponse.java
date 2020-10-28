@@ -8,6 +8,7 @@ import lombok.Data;
 public class ProductResponse {
     int id;
     String name;
+    String slug;
     String vendor;
     double price;
     ProductStatus status;
@@ -16,6 +17,7 @@ public class ProductResponse {
     public ProductResponse(Product product) {
         id = product.getId();
         name = product.getName();
+        slug = product.getSlug();
         price = product.getPrice();
 
         status = product.getStatus();

@@ -43,6 +43,14 @@ public class CategoryService {
             return new CategoryResponse(categoryrepository.save(existingCategory));
         }
 
+        // add validation for parent category
+        // do the same for update
+
+        //this means the category has a parent category
+        if (category.getParent() != null) {
+            // check if the parent category exists and is not deleted
+        }
+
         return new CategoryResponse(categoryrepository.save(category));
     }
 
@@ -61,6 +69,22 @@ public class CategoryService {
         }
 
         return new CategoryResponse(existingCategory);
+    }
+
+    // get parent categories
+    public List<CategoryResponse> findAllParentCategories() throws Exception {
+        return categoryrepository.findAllByParentIdAndIsDeleted(null, false)
+                .stream()
+                .map(CategoryResponse::new)
+                .collect(Collectors.toList());
+    }
+
+    // get child categories
+    public List<CategoryResponse> findAllSubCategories(int catId) throws Exception {
+        return categoryrepository.findAllByParentIdAndIsDeleted(catId, false)
+                .stream()
+                .map(CategoryResponse::new)
+                .collect(Collectors.toList());
     }
 }
 
