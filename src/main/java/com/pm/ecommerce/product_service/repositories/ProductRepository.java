@@ -22,4 +22,12 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     Product findByStatus(ProductStatus status);
 
     List<Product> findAllByStatus(ProductStatus status);
+
+    Page<Product> findAllByStatus(ProductStatus status,Pageable pageable);
+    Product findByIdAndStatus(int productid,ProductStatus status);
+
+
+
+
+
 }
