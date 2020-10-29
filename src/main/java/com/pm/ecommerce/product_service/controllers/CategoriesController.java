@@ -2,15 +2,18 @@ package com.pm.ecommerce.product_service.controllers;
 
 import com.pm.ecommerce.entities.ApiResponse;
 import com.pm.ecommerce.entities.Category;
+import com.pm.ecommerce.entities.Notification;
 import com.pm.ecommerce.product_service.models.CategoryResponse;
+import com.pm.ecommerce.product_service.models.PagedResponse;
+import com.pm.ecommerce.product_service.repositories.NotificationRepository;
 import com.pm.ecommerce.product_service.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -19,6 +22,12 @@ public class CategoriesController {
 
     @Autowired
     CategoryService categoryservice;
+
+    @Autowired
+    KafkaTemplate<String, Long> template;
+
+    @Autowired
+    NotificationRepository repository;
 
     @PostMapping("")
     public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@Valid @RequestBody Category category) {
@@ -36,13 +45,27 @@ public class CategoriesController {
     }
 
     @GetMapping("")
-    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllcategories() {
-        ApiResponse<List<CategoryResponse>> response = new ApiResponse<>();
+    public ResponseEntity<ApiResponse<PagedResponse<CategoryResponse>>> getAllcategories(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "perPage", defaultValue = "20") int itemsPerPage
+    ) {
+        ApiResponse<PagedResponse<CategoryResponse>> response = new ApiResponse<>();
         try {
-            List<CategoryResponse> allcategories = categoryservice.findAllCategories();
+            Notification notification = new Notification();
+            notification.setSender("sa.giri@miu.edu");
+            notification.setReceiver("ioesandeep@gmail.com");
+            notification.setSubject("We have received your order");
+            notification.setMessage("Hey! \n Thank you for your order.");
+
+            repository.save(notification);
+
+            template.send("NotificationTopic", notification.getId());
+
+            PagedResponse<CategoryResponse> allcategories = categoryservice.findAllCategories(page, itemsPerPage);
             response.setData(allcategories);
             response.setMessage("Get All categories");
         } catch (Exception e) {
+            e.printStackTrace();
             response.setStatus(500);
             response.setMessage(e.getMessage());
         }
