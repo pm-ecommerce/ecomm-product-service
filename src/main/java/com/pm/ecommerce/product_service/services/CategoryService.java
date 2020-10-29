@@ -50,14 +50,24 @@ public class CategoryService {
             categoryrepository.save(existingCategory);
         }
 
-          if(category.getParent()==null){
+        //validating sub categories
 
-              System.out.println("*****************************no parent");
-          }
-          else{
+         if(category.getParent()!=null){
 
-              category.setParent(category.getParent());
-          }
+             Category existing=categoryrepository.findByParent(category.getParent().getId());
+
+             if(existing==null){
+
+                 throw new Exception("you are trying to create unknow parent categories");
+             }
+             else{
+
+                 category.setParent(existing);
+             }
+
+         }
+
+
            //category.setParent(category.getParent());
         // add validation for parent category
         // do the same for update
@@ -94,12 +104,21 @@ public class CategoryService {
     }
 
     // get parent categories
-    public List<CategoryResponse> findAllParentCategories(int cataid) throws Exception {
+    public PagedResponse<CategoryResponse> findAllParentCategories(int cataid,int page, int itemsPerPage) throws Exception {
 
-        return categoryrepository.findAllByParentIdAndIsDeleted(cataid, false)
-                .stream()
-                .map(CategoryResponse::new)
-                .collect(Collectors.toList());
+        if (page < 1) {
+            throw new Exception("Page number is invalid.");
+        }
+
+        Pageable paging = PageRequest.of(page - 1, itemsPerPage);
+        Page<Category> pagedResult = categoryrepository.findAllByParentIdAndIsDeleted(cataid,false, paging);
+
+        int totalPages = pagedResult.getTotalPages();
+
+        List<CategoryResponse> categories = pagedResult.toList().stream().map(CategoryResponse::new).collect(Collectors.toList());
+
+
+        return new PagedResponse<>(totalPages, page, itemsPerPage, categories);
     }
 
 

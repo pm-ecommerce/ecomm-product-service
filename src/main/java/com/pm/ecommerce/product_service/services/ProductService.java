@@ -129,6 +129,21 @@ public class ProductService {
             existingProduct.setCategory(existingCategory);
         }
 
+        // validation for subcategory
+
+        if (product.getSubCategory() == null) {
+            Category existingCategory = categoryrepository.findById(existingProduct.getSubCategory().getId()).orElse(null);
+            if (existingCategory == null || existingCategory.isDeleted()) {
+                throw new Exception("Category does not exist.");
+            }
+        } else if (product.getSubCategory() != null) {
+            Category existingCategory = categoryrepository.findById(product.getSubCategory().getId()).orElse(null);
+            if (existingCategory == null || existingCategory.isDeleted()) {
+                throw new Exception("Category does not exist.");
+            }
+            existingProduct.setSubCategory(existingCategory);
+        }
+
         if (product.getDescription() != null && !existingProduct.getDescription().equals(product.getDescription())) {
             existingProduct.setDescription(product.getDescription());
         }

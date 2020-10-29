@@ -2,7 +2,7 @@ package com.pm.ecommerce.product_service.controllers;
 
 import com.pm.ecommerce.entities.ApiResponse;
 import com.pm.ecommerce.entities.Category;
-import com.pm.ecommerce.entities.Notification;
+
 import com.pm.ecommerce.product_service.models.CategoryResponse;
 import com.pm.ecommerce.product_service.models.PagedResponse;
 import com.pm.ecommerce.product_service.repositories.NotificationRepository;
@@ -14,6 +14,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -73,6 +74,23 @@ public class CategoriesController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/parent/{parentid}")
+    public ResponseEntity<ApiResponse<PagedResponse<CategoryResponse>>>  getAllparentcategories(@PathVariable int parentid,
+                                                                                                @RequestParam(name = "page", defaultValue = "1") int page,
+                                                                                                @RequestParam(name = "perPage", defaultValue = "20") int itemsPerPage) {
+        ApiResponse<PagedResponse<CategoryResponse>> response = new ApiResponse<>();
+        try {
+            PagedResponse<CategoryResponse> allcategories = categoryservice.findAllParentCategories(parentid,page, itemsPerPage);
+            response.setData(allcategories);
+            response.setMessage("Get All categories by parentid");
+        } catch (Exception e) {
+            response.setStatus(500);
+            response.setMessage(e.getMessage());
+        }
+
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{categoryId}")
     public ResponseEntity<ApiResponse<CategoryResponse>> getCategory(@PathVariable int categoryId) {
         ApiResponse<CategoryResponse> response = new ApiResponse<>();
@@ -88,18 +106,5 @@ public class CategoriesController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/parent/{parentid}")
-    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllparentcategories(@PathVariable int parentid) {
-        ApiResponse<List<CategoryResponse>> response = new ApiResponse<>();
-        try {
-            List<CategoryResponse> allcategories = categoryservice.findAllParentCategories(parentid);
-            response.setData(allcategories);
-            response.setMessage("Get All categories");
-        } catch (Exception e) {
-            response.setStatus(500);
-            response.setMessage(e.getMessage());
-        }
 
-        return ResponseEntity.ok(response);
-    }
 }
