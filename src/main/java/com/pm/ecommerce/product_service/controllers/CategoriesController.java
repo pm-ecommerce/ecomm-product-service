@@ -64,4 +64,19 @@ public class CategoriesController {
         }
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/parent/{parentid}")
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllparentcategories(@PathVariable int parentid) {
+        ApiResponse<List<CategoryResponse>> response = new ApiResponse<>();
+        try {
+            List<CategoryResponse> allcategories = categoryservice.findAllParentCategories(parentid);
+            response.setData(allcategories);
+            response.setMessage("Get All categories");
+        } catch (Exception e) {
+            response.setStatus(500);
+            response.setMessage(e.getMessage());
+        }
+
+        return ResponseEntity.ok(response);
+    }
 }

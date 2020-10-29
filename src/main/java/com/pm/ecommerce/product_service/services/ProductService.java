@@ -134,6 +134,10 @@ public class ProductService {
         }
 
         // add validation for subcategory
+        if (product.getSubCategory() != null && !existingProduct.getSubCategory().equals(product.getSubCategory())) {
+            existingProduct.setSubCategory(product.getSubCategory());
+        }
+
 
         if (product.getPrice() >= 0 && existingProduct.getPrice() != product.getPrice()) {
             existingProduct.setPrice(product.getPrice());

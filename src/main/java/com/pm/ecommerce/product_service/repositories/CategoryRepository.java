@@ -21,4 +21,9 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
     List<Category> findAllByIsDeleted(boolean isDeleted);
 
     List<Category> findAllByParentIdAndIsDeleted(Integer catId, boolean b);
+
+    Category findByParentAndIsDeleted(int parentid, boolean b);
+
+
+
 }

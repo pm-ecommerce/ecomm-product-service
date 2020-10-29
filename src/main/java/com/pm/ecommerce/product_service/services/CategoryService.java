@@ -23,15 +23,18 @@ public class CategoryService {
             throw new Exception("Data expected with this request.");
         }
 
+        System.out.println("*****************************1");
         if (category.getName() == null) {
             throw new Exception("category should not be null");
         }
 
+        System.out.println("*****************************2");
         Category existingCategory = categoryrepository.findByName(category.getName());
 
         if (existingCategory != null && !existingCategory.isDeleted()) {
             throw new Exception("category already exists");
         }
+        System.out.println("*****************************3");
 
         // undelete an existing category which has the same name
         if (existingCategory != null) {
@@ -40,16 +43,23 @@ public class CategoryService {
                 existingCategory.setImage(category.getImage());
             }
 
-            return new CategoryResponse(categoryrepository.save(existingCategory));
+            categoryrepository.save(existingCategory);
         }
 
+          if(category.getParent()==null){
+
+              System.out.println("*****************************no parent");
+          }
+          else{
+
+              category.setParent(category.getParent());
+          }
+           //category.setParent(category.getParent());
         // add validation for parent category
         // do the same for update
 
         //this means the category has a parent category
-        if (category.getParent() != null) {
-            // check if the parent category exists and is not deleted
-        }
+
 
         return new CategoryResponse(categoryrepository.save(category));
     }
@@ -72,20 +82,15 @@ public class CategoryService {
     }
 
     // get parent categories
-    public List<CategoryResponse> findAllParentCategories() throws Exception {
-        return categoryrepository.findAllByParentIdAndIsDeleted(null, false)
+    public List<CategoryResponse> findAllParentCategories(int cataid) throws Exception {
+
+        return categoryrepository.findAllByParentIdAndIsDeleted(cataid, false)
                 .stream()
                 .map(CategoryResponse::new)
                 .collect(Collectors.toList());
     }
 
-    // get child categories
-    public List<CategoryResponse> findAllSubCategories(int catId) throws Exception {
-        return categoryrepository.findAllByParentIdAndIsDeleted(catId, false)
-                .stream()
-                .map(CategoryResponse::new)
-                .collect(Collectors.toList());
-    }
+
 }
 
 
