@@ -51,15 +51,15 @@ public class CategoriesController {
     ) {
         ApiResponse<PagedResponse<CategoryResponse>> response = new ApiResponse<>();
         try {
-            Notification notification = new Notification();
-            notification.setSender("sa.giri@miu.edu");
-            notification.setReceiver("ioesandeep@gmail.com");
-            notification.setSubject("We have received your order");
-            notification.setMessage("Hey! \n Thank you for your order.");
-
-            repository.save(notification);
-
-            template.send("NotificationTopic", notification.getId());
+//            Notification notification = new Notification();
+//            notification.setSender("sa.giri@miu.edu");
+//            notification.setReceiver("ioesandeep@gmail.com");
+//            notification.setSubject("We have received your order");
+//            notification.setMessage("Hey! \n Thank you for your order.");
+//
+//            repository.save(notification);
+//
+//            template.send("NotificationTopic", notification.getId());
 
             PagedResponse<CategoryResponse> allcategories = categoryservice.findAllCategories(page, itemsPerPage);
             response.setData(allcategories);
