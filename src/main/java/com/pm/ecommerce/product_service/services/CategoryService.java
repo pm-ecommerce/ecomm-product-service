@@ -2,9 +2,13 @@ package com.pm.ecommerce.product_service.services;
 
 import com.pm.ecommerce.entities.Category;
 import com.pm.ecommerce.product_service.models.CategoryResponse;
+import com.pm.ecommerce.product_service.models.PagedResponse;
 import com.pm.ecommerce.product_service.repositories.CategoryRepository;
 import com.pm.ecommerce.product_service.repositories.VendorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -64,11 +68,19 @@ public class CategoryService {
         return new CategoryResponse(categoryrepository.save(category));
     }
 
-    public List<CategoryResponse> findAllCategories() throws Exception {
-        return categoryrepository.findAllByIsDeleted(false)
-                .stream()
-                .map(CategoryResponse::new)
-                .collect(Collectors.toList());
+    public PagedResponse<CategoryResponse> findAllCategories(int page, int itemsPerPage) throws Exception {
+        if (page < 1) {
+            throw new Exception("Page number is invalid.");
+        }
+
+        Pageable paging = PageRequest.of(page - 1, itemsPerPage);
+        Page<Category> pagedResult = categoryrepository.findAllByIsDeleted(false, paging);
+
+        int totalPages = pagedResult.getTotalPages();
+
+        List<CategoryResponse> categories = pagedResult.toList().stream().map(CategoryResponse::new).collect(Collectors.toList());
+
+        return new PagedResponse<>(totalPages, page, itemsPerPage, categories);
     }
 
     public CategoryResponse findCategoryByID(int catid) throws Exception {
