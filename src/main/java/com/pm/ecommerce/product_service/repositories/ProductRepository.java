@@ -1,6 +1,7 @@
 package com.pm.ecommerce.product_service.repositories;
 
 import com.pm.ecommerce.entities.Product;
+import com.pm.ecommerce.entities.ScheduledDelivery;
 import com.pm.ecommerce.enums.ProductStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,4 +24,5 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     Page<Product> findAllByStatusIn(List<ProductStatus> statusList, Pageable paging);
 
     Page<Product> findAllByStatus(ProductStatus stausid, Pageable paging);
+
 }
