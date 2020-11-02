@@ -11,4 +11,6 @@ public interface VendorRepository extends JpaRepository<Vendor, Integer> {
     Vendor getByBusinessName(int id);
 
     Vendor getByAddress(String addressname);
+
+    Vendor findById(int userid);
 }
