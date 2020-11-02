@@ -2,9 +2,13 @@ package com.pm.ecommerce.product_service.services;
 
 import com.pm.ecommerce.entities.Category;
 import com.pm.ecommerce.product_service.models.CategoryResponse;
+import com.pm.ecommerce.product_service.models.PagedResponse;
 import com.pm.ecommerce.product_service.repositories.CategoryRepository;
 import com.pm.ecommerce.product_service.repositories.VendorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,15 +27,18 @@ public class CategoryService {
             throw new Exception("Data expected with this request.");
         }
 
+        System.out.println("*****************************1");
         if (category.getName() == null) {
             throw new Exception("category should not be null");
         }
 
+        System.out.println("*****************************2");
         Category existingCategory = categoryrepository.findByName(category.getName());
 
         if (existingCategory != null && !existingCategory.isDeleted()) {
             throw new Exception("category already exists");
         }
+        System.out.println("*****************************3");
 
         // undelete an existing category which has the same name
         if (existingCategory != null) {
@@ -40,25 +47,87 @@ public class CategoryService {
                 existingCategory.setImage(category.getImage());
             }
 
-            return new CategoryResponse(categoryrepository.save(existingCategory));
+            categoryrepository.save(existingCategory);
         }
 
-        // add validation for parent category
-        // do the same for update
+        //validating sub categories
 
-        //this means the category has a parent category
         if (category.getParent() != null) {
-            // check if the parent category exists and is not deleted
-        }
 
+            Category existing = categoryrepository.findByParent(category.getParent().getId());
+
+            if (existing == null) {
+
+                throw new Exception("you are trying to create unknow parent categories");
+            } else {
+
+                category.setParent(existing);
+            }
+
+        }
         return new CategoryResponse(categoryrepository.save(category));
     }
 
-    public List<CategoryResponse> findAllCategories() throws Exception {
-        return categoryrepository.findAllByIsDeleted(false)
-                .stream()
-                .map(CategoryResponse::new)
-                .collect(Collectors.toList());
+
+    public CategoryResponse updateCategory(Category category, int catid) throws Exception {
+
+        Category existed = categoryrepository.findById(catid).orElse(null);
+
+
+        //Vendor existedvendor=vendorrepository.findById(existed.)
+        if (existed == null) {
+
+            throw new Exception("categories not found");
+        }
+
+        if (category == null) {
+            throw new Exception("Data expected with this request.");
+        }
+
+
+        if (category.getName() == null) {
+            throw new Exception("category should not be null");
+        }
+
+
+        Category existingCategory = categoryrepository.findByName(category.getName());
+
+        if (existingCategory != null && !existingCategory.isDeleted()) {
+            throw new Exception("category already exists");
+        }
+
+
+        // undelete an existing category which has the same name
+        if (existingCategory != null) {
+            existingCategory.setDeleted(false);
+            if (category.getImage() != null) {
+                existingCategory.setImage(category.getImage());
+            }
+
+            categoryrepository.save(existingCategory);
+
+            return new CategoryResponse(existingCategory);
+        }
+
+        existed.setName(category.getName());
+        existed.setImage(category.getImage());
+
+        return new CategoryResponse(categoryrepository.save(existed));
+    }
+
+    public PagedResponse<CategoryResponse> findAllCategories(int page, int itemsPerPage) throws Exception {
+        if (page < 1) {
+            throw new Exception("Page number is invalid.");
+        }
+
+        Pageable paging = PageRequest.of(page - 1, itemsPerPage);
+        Page<Category> pagedResult = categoryrepository.findAllByIsDeleted(false, paging);
+
+        int totalPages = pagedResult.getTotalPages();
+
+        List<CategoryResponse> categories = pagedResult.toList().stream().map(CategoryResponse::new).collect(Collectors.toList());
+
+        return new PagedResponse<>(totalPages, page, itemsPerPage, categories);
     }
 
     public CategoryResponse findCategoryByID(int catid) throws Exception {
@@ -72,20 +141,54 @@ public class CategoryService {
     }
 
     // get parent categories
-    public List<CategoryResponse> findAllParentCategories() throws Exception {
-        return categoryrepository.findAllByParentIdAndIsDeleted(null, false)
-                .stream()
-                .map(CategoryResponse::new)
-                .collect(Collectors.toList());
+    public PagedResponse<CategoryResponse> findAllParentCategories(int cataid, int page, int itemsPerPage) throws Exception {
+
+        if (page < 1) {
+            throw new Exception("Page number is invalid.");
+        }
+
+        Pageable paging = PageRequest.of(page - 1, itemsPerPage);
+        Page<Category> pagedResult = categoryrepository.findAllByParentIdAndIsDeleted(cataid, false, paging);
+
+        int totalPages = pagedResult.getTotalPages();
+
+        List<CategoryResponse> categories = pagedResult.toList().stream().map(CategoryResponse::new).collect(Collectors.toList());
+
+
+        return new PagedResponse<>(totalPages, page, itemsPerPage, categories);
     }
 
+
     // get child categories
-    public List<CategoryResponse> findAllSubCategories(int catId) throws Exception {
-        return categoryrepository.findAllByParentIdAndIsDeleted(catId, false)
-                .stream()
-                .map(CategoryResponse::new)
-                .collect(Collectors.toList());
+    public PagedResponse<CategoryResponse> findAllSubCategories(int cartId, int page, int itemsPerPage) throws Exception {
+        if (page < 1) {
+            throw new Exception("Page number is invalid.");
+        }
+
+        Pageable paging = PageRequest.of(page - 1, itemsPerPage);
+        Page<Category> pagedResult = categoryrepository.findAllByParentIdAndIsDeleted(cartId, false, paging);
+
+        int totalPages = pagedResult.getTotalPages();
+
+        List<CategoryResponse> categories = pagedResult.toList().stream().map(CategoryResponse::new).collect(Collectors.toList());
+
+
+        return new PagedResponse<>(totalPages, page, itemsPerPage, categories);
     }
+
+    public CategoryResponse deleteBycategorybyid(int categoid) throws Exception {
+        Category existed = categoryrepository.findById(categoid).orElse(null);
+        if (existed == null) {
+            throw new Exception("your catagories not existed");
+        }
+
+        existed.setDeleted(true);
+        categoryrepository.save(existed);
+
+        return new CategoryResponse(existed);
+    }
+
+
 }
 
 

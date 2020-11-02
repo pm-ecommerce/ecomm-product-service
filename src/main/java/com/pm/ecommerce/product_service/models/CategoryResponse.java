@@ -8,6 +8,7 @@ public class CategoryResponse {
     int id;
     String name;
     String image;
+    String parent;
 
     public CategoryResponse(Category category) {
         id = category.getId();
@@ -15,6 +16,10 @@ public class CategoryResponse {
 
         if (category.getImage() != null) {
             image = category.getImage().getName();
+        }
+
+        if (category.getParent() != null) {
+            parent = category.getParent().getName();
         }
     }
 }

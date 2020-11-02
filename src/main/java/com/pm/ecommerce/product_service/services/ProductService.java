@@ -6,8 +6,10 @@ import com.pm.ecommerce.enums.VendorStatus;
 import com.pm.ecommerce.product_service.models.PagedResponse;
 import com.pm.ecommerce.product_service.models.ProductResponse;
 import com.pm.ecommerce.product_service.models.SingleProductResponse;
+import com.pm.ecommerce.product_service.notifications.events.ProductApprovedEvent;
 import com.pm.ecommerce.product_service.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +38,9 @@ public class ProductService {
 
     @Autowired
     EntityManager em;
+
+    @Autowired
+    ApplicationEventPublisher publisher;
 
     protected String generateSlug(String str, int vendorId) {
         return vendorId + "-" + str.toLowerCase().replaceAll("[\\s+]", "-");
@@ -129,11 +134,30 @@ public class ProductService {
             existingProduct.setCategory(existingCategory);
         }
 
+        // validation for subcategory
+
+        if (product.getSubCategory() == null) {
+            Category existingCategory = categoryrepository.findById(existingProduct.getSubCategory().getId()).orElse(null);
+            if (existingCategory == null || existingCategory.isDeleted()) {
+                throw new Exception("Category does not exist.");
+            }
+        } else if (product.getSubCategory() != null) {
+            Category existingCategory = categoryrepository.findById(product.getSubCategory().getId()).orElse(null);
+            if (existingCategory == null || existingCategory.isDeleted()) {
+                throw new Exception("Category does not exist.");
+            }
+            existingProduct.setSubCategory(existingCategory);
+        }
+
         if (product.getDescription() != null && !existingProduct.getDescription().equals(product.getDescription())) {
             existingProduct.setDescription(product.getDescription());
         }
 
         // add validation for subcategory
+        if (product.getSubCategory() != null && !existingProduct.getSubCategory().equals(product.getSubCategory())) {
+            existingProduct.setSubCategory(product.getSubCategory());
+        }
+
 
         if (product.getPrice() >= 0 && existingProduct.getPrice() != product.getPrice()) {
             existingProduct.setPrice(product.getPrice());
@@ -346,8 +370,12 @@ public class ProductService {
         if (approvedProduct == null) {
             throw new Exception("Product not found");
         }
+
         approvedProduct.setStatus(ProductStatus.PUBLISHED);
         productrepository.save(approvedProduct);
+
+        publisher.publishEvent(new ProductApprovedEvent(this, approvedProduct));
+
         return new ProductResponse(approvedProduct);
     }
 
@@ -356,11 +384,14 @@ public class ProductService {
         if (rejectedproduct == null) {
             throw new Exception("Product not found");
         }
+
         rejectedproduct.setStatus(ProductStatus.UNAPPROVED);
         productrepository.save(rejectedproduct);
+
+        publisher.publishEvent(new ProductApprovedEvent(this, rejectedproduct));
+
         return new ProductResponse(rejectedproduct);
 
     }
 
 }
-
