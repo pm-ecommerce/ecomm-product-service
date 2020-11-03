@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Configuration
 public class KafkaProducerConfig {
-    @Value("${zookeeper.url:localhost:9092}")
+    @Value("${kafka.url}")
     String zookeeperUrl;
 
     @Bean
