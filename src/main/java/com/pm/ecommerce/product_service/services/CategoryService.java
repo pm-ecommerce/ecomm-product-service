@@ -27,18 +27,16 @@ public class CategoryService {
             throw new Exception("Data expected with this request.");
         }
 
-        System.out.println("*****************************1");
         if (category.getName() == null) {
             throw new Exception("category should not be null");
         }
 
-        System.out.println("*****************************2");
         Category existingCategory = categoryrepository.findByName(category.getName());
 
         if (existingCategory != null && !existingCategory.isDeleted()) {
             throw new Exception("category already exists");
         }
-        System.out.println("*****************************3");
+
 
         // undelete an existing category which has the same name
         if (existingCategory != null) {
@@ -92,9 +90,7 @@ public class CategoryService {
 
         Category existingCategory = categoryrepository.findByName(category.getName());
 
-        if (existingCategory != null && !existingCategory.isDeleted()) {
-            throw new Exception("category already exists");
-        }
+
 
 
         // undelete an existing category which has the same name
