@@ -81,7 +81,8 @@ public class ProductService {
         product.setVendor(vendor);
         product.setStatus(ProductStatus.CREATED);
 
-        return new ProductResponse(productrepository.save(product));
+        productrepository.save(product);
+        return new ProductResponse(product);
     }
 
     public ProductResponse updateproduct(Product product, int vendorid, int productid) throws Exception {
@@ -137,9 +138,11 @@ public class ProductService {
         // validation for subcategory
 
         if (product.getSubCategory() == null) {
-            Category existingCategory = categoryrepository.findById(existingProduct.getSubCategory().getId()).orElse(null);
-            if (existingCategory == null || existingCategory.isDeleted()) {
-                throw new Exception("Category does not exist.");
+            if (existingProduct.getSubCategory() != null) {
+                Category existingCategory = categoryrepository.findById(existingProduct.getSubCategory().getId()).orElse(null);
+                if (existingCategory == null || existingCategory.isDeleted()) {
+                    throw new Exception("Sub category does not exist.");
+                }
             }
         } else if (product.getSubCategory() != null) {
             Category existingCategory = categoryrepository.findById(product.getSubCategory().getId()).orElse(null);
@@ -152,12 +155,6 @@ public class ProductService {
         if (product.getDescription() != null && !existingProduct.getDescription().equals(product.getDescription())) {
             existingProduct.setDescription(product.getDescription());
         }
-
-        // add validation for subcategory
-        if (product.getSubCategory() != null && !existingProduct.getSubCategory().equals(product.getSubCategory())) {
-            existingProduct.setSubCategory(product.getSubCategory());
-        }
-
 
         if (product.getPrice() >= 0 && existingProduct.getPrice() != product.getPrice()) {
             existingProduct.setPrice(product.getPrice());

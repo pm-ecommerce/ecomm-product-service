@@ -47,6 +47,7 @@ public class ProductsController {
 
             response.setData(updated);
         } catch (Exception e) {
+            e.printStackTrace();
             response.setMessage(e.getMessage());
             response.setStatus(500);
         }

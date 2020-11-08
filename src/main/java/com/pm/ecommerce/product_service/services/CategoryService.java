@@ -73,10 +73,7 @@ public class CategoryService {
 
         Category existed = categoryrepository.findById(catid).orElse(null);
 
-
-        //Vendor existedvendor=vendorrepository.findById(existed.)
         if (existed == null) {
-
             throw new Exception("categories not found");
         }
 
@@ -84,33 +81,27 @@ public class CategoryService {
             throw new Exception("Data expected with this request.");
         }
 
-
         if (category.getName() == null) {
             throw new Exception("category should not be null");
         }
 
-
         Category existingCategory = categoryrepository.findByName(category.getName());
 
-        if (existingCategory != null && !existingCategory.isDeleted()) {
-            throw new Exception("category already exists");
-        }
-
-
-        // undelete an existing category which has the same name
-        if (existingCategory != null) {
-            existingCategory.setDeleted(false);
-            if (category.getImage() != null) {
-                existingCategory.setImage(category.getImage());
-            }
-
-            categoryrepository.save(existingCategory);
-
-            return new CategoryResponse(existingCategory);
+        if (existingCategory != null && existingCategory.getId() != existed.getId()) {
+            throw new Exception("A category with the same name already exists");
         }
 
         existed.setName(category.getName());
         existed.setImage(category.getImage());
+
+        if (category.getParent() != null) {
+            Category parent = categoryrepository.findById(category.getParent().getId()).orElse(null);
+            if (parent == null) {
+                throw new Exception("Parent category does not exist.");
+            }
+
+            existed.setParent(parent);
+        }
 
         return new CategoryResponse(categoryrepository.save(existed));
     }
